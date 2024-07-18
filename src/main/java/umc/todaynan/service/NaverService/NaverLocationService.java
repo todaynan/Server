@@ -38,6 +38,7 @@ public class NaverLocationService {
                     .queryParam("query", searchString)
                     .queryParam("display", 5)
                     .queryParam("start", 1)
+                    .queryParam("sort", "random")
                     .encode(Charset.forName("UTF-8"))
                     .build()
                     .toUri();
