@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import umc.todaynan.converter.UserConverter;
@@ -46,7 +47,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthFilter(tokenService, userRepository,userConverter), UsernamePasswordAuthenticationFilter.class)
 
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/token/expired")
+                        .loginPage("/health")
                         .permitAll()
                         .successHandler(oAuth2SuccessHandler)
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
@@ -59,6 +60,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
     @Bean
     public GrantedAuthoritiesMapper customAuthorityMapper() {
         return new CustomAuthorityMapper();
