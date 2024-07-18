@@ -16,7 +16,7 @@ import java.util.Date;
 @Service
 public class TokenService {
     @Value("${JWT_SECRET_KEY}")
-    private String secretKey;  //시크릿 키
+    private String secretKey;  //시크릿 키 수정
 
     @PostConstruct
     protected void init() {
