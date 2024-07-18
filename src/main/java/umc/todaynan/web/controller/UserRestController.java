@@ -12,8 +12,10 @@ import umc.todaynan.domain.enums.LoginType;
 import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.oauth2.user.GoogleTokenInfo;
+import umc.todaynan.oauth2.user.NaverTokenInfo;
 import umc.todaynan.repository.UserRepository;
-import umc.todaynan.service.UserService.GoogleTokenService;
+import umc.todaynan.service.NaverService.NaverTokenService;
+import umc.todaynan.service.GoogleService.GoogleTokenService;
 import umc.todaynan.service.UserService.UserService;
 import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
@@ -29,6 +31,7 @@ public class UserRestController {
     private final UserService userService;
     private final UserConverter userConverter;
     private final GoogleTokenService googleTokenService;
+    private final NaverTokenService naverTokenService;
     private final UserRepository userRepository;
 
     /**
@@ -41,20 +44,39 @@ public class UserRestController {
             @RequestHeader("accessToken") String accessToken,
             @RequestParam("Login Type") LoginType loginType,
             @RequestBody UserRequestDTO.JoinUserDTO joinUserDTO) {
-        if(loginType== LoginType.GOOGLE) {
-            Optional<GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
-            if (googleTokenInfo.isPresent()) {
-                if (userRepository.existsByEmail(googleTokenInfo.get().getEmail())) {
-                    return ApiResponse.onFailure(ErrorStatus.USER_EXIST.getCode(), ErrorStatus.USER_EXIST.getMessage(), null);
+
+        switch (loginType) {
+            case GOOGLE -> {
+                Optional<GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
+                if (googleTokenInfo.isPresent()) {
+                    if (userRepository.existsByEmail(googleTokenInfo.get().getEmail())) {
+                        return ApiResponse.onFailure(ErrorStatus.USER_EXIST.getCode(), ErrorStatus.USER_EXIST.getMessage(), null);
+                    }
+                    User user = userService.joinUser(joinUserDTO, googleTokenInfo.get().getEmail(), loginType);
+                    Token token = tokenService.generateToken(user.getEmail(), "USER");
+                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResultDTO(user, token));
+                } else {
+                    return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
                 }
-                User user = userService.joinUser(joinUserDTO, googleTokenInfo.get().getEmail(), loginType);
-                Token token = tokenService.generateToken(user.getEmail(), "USER");
-                return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResultDTO(user, token));
-            }else {
+            }
+
+            case NAVER -> {
+                Optional<NaverTokenInfo> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
+                if (naverTokenInfo.isPresent()) {
+                    if (userRepository.existsByEmail(naverTokenInfo.get().getResponse().getEmail())) {
+                        return ApiResponse.onFailure(ErrorStatus.USER_EXIST.getCode(), ErrorStatus.USER_EXIST.getMessage(), null);
+                    }
+                    User user = userService.joinUser(joinUserDTO, naverTokenInfo.get().getResponse().getEmail(), loginType);
+                    Token token = tokenService.generateToken(user.getEmail(), "USER");
+                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResultDTO(user, token));
+                } else {
+                    return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
+                }
+            }
+
+            default -> {
                 return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
             }
-        }else {
-            return null;
         }
     }
     /**
@@ -80,7 +102,7 @@ public class UserRestController {
      */
     @GetMapping("/auto-login/")
     public ApiResponse<UserResponseDTO.AutoLoginResultDTO> autoLogin(HttpServletRequest httpServletRequest) {
-        return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.autoLoginMember(httpServletRequest));
+        return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.autoLoginUser(httpServletRequest));
     }
 
     /**
@@ -89,17 +111,30 @@ public class UserRestController {
      * Authentication -> Security
      */
     @GetMapping("/login/")
-    public ApiResponse<String> login(@RequestParam("Access Token") String accessToken,
-                                     @RequestParam("Login Type") LoginType loginType) {
-        if (loginType == LoginType.GOOGLE) {
-            Optional<GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
-            if (googleTokenInfo.isPresent()) {
-                return ApiResponse.of(SuccessStatus.USER_LOGIN, googleTokenInfo.get().getEmail());
-            } else {
+    public ApiResponse<UserResponseDTO.LoginResultDTO> login(@RequestParam("Access Token") String accessToken,
+                                                             @RequestParam("Login Type") LoginType loginType) {
+        switch (loginType) {
+            case GOOGLE -> {
+                Optional<GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
+                if (googleTokenInfo.isPresent()) {
+                    return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(googleTokenInfo.get().getEmail()));
+                } else {
+                    return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
+                }
+            }
+
+            case NAVER-> {
+                Optional<NaverTokenInfo> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
+                if (naverTokenInfo.isPresent()) {
+                    return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(naverTokenInfo.get().getResponse().getEmail()));
+                } else {
+                    return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
+                }
+            }
+
+            default -> {
                 return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
             }
-        }else {
-            return null;
         }
     }
 }

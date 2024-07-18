@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
-                        .requestMatchers("/token/**", "/user/signup/**", "/user/login/**", "/health").permitAll()
+                        .requestMatchers("/token/**", "/user/signup/**", "/user/login/**", "/health", "/place/search/**").permitAll()
                         .anyRequest().authenticated())
 
                 .addFilterBefore(new JwtAuthFilter(tokenService, userRepository,userConverter), UsernamePasswordAuthenticationFilter.class)

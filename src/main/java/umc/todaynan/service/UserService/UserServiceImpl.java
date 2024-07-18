@@ -13,6 +13,7 @@ import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.UserConverter;
 import umc.todaynan.converter.UserPreferConverter;
 import umc.todaynan.domain.entity.User.User.User;
+import umc.todaynan.domain.entity.User.UserLike.UserLike;
 import umc.todaynan.domain.entity.User.UserPrefer.PreferCategory;
 import umc.todaynan.domain.entity.User.UserPrefer.UserPrefer;
 import umc.todaynan.domain.enums.LoginType;
@@ -20,6 +21,7 @@ import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.oauth2.user.ProviderUser;
 import umc.todaynan.repository.PreferCategoryRepository;
+import umc.todaynan.repository.UserLikeRepository;
 import umc.todaynan.repository.UserRepository;
 import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
@@ -40,6 +42,8 @@ public class UserServiceImpl implements UserService{
 
     private final PreferCategoryRepository preferCategoryRepository;
     private final UserRepository userRepository;
+    private final UserLikeRepository userLikeRepository;
+
     private final TokenService tokenService;
     private final UserConverter userConverter;
 
@@ -97,7 +101,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDTO.AutoLoginResultDTO autoLoginMember(HttpServletRequest httpServletRequest) {
+    public UserResponseDTO.AutoLoginResultDTO autoLoginUser(HttpServletRequest httpServletRequest) {
         String givenToken = tokenService.getJwtFromHeader(httpServletRequest);
         String email = tokenService.getUid(givenToken);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserHandler(ErrorStatus.USER_ERROR));
@@ -119,6 +123,38 @@ public class UserServiceImpl implements UserService{
             LocalDateTime expiration = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 
             return userConverter.toLoginResultDTO(user.get(), newToken,expiration);
+        }
+        else{   //존재 X
+            return null;
+        }
+    }
+    @Transactional
+    @Override
+    public UserLike likeLocation(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeDTO userLikeDTO) {
+        String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
+
+        if(userRepository.existsByEmail(email)) { //이미 존재
+            Optional<User> user = userRepository.findByEmail(email);
+            UserLike userLike = userConverter.toUserLike(user.get(), userLikeDTO);
+
+            return userLikeRepository.save(userLike);
+        }
+        else{   //존재 X
+            return null;
+        }
+    }
+
+    @Override
+    public UserResponseDTO.GetUserLikeListResultDTO likeLocationList(HttpServletRequest httpServletRequest) {
+        String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
+
+        if(userRepository.existsByEmail(email)) { //이미 존재
+            Optional<User> user = userRepository.findByEmail(email);
+            List<UserLike> userLikeListResultList = userLikeRepository.findAllByUser(user.get());
+
+            logger.debug("userLikeListResultList : {}", userLikeListResultList);
+
+            return userConverter.toUserLikeListResultDTO(userLikeListResultList);
         }
         else{   //존재 X
             return null;
