@@ -44,7 +44,7 @@ public class NaverRestController {
      * 장소 검색 API
      * No Authorization
      */
-    @GetMapping("/search/outside//{searchString}")
+    @GetMapping("/search/outside/{searchString}")
     public ApiResponse<NaverResponseDTO.NaverSearchDTO> getSearchLocation(
             @PathVariable(name = "searchString") String searchString) {
         Optional<NaverLocationInfo> naverLocationInfo = naverLocationService.searchLocation(searchString);
