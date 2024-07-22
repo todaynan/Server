@@ -1,6 +1,10 @@
 package umc.todaynan.web.dto.UserDTO;
 
 import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import umc.todaynan.domain.enums.PlaceCategory;
 
 import java.time.LocalDateTime;

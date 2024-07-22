@@ -18,7 +18,13 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_EXIST(HttpStatus.NOT_FOUND, "USER2004", "없는 계정입니다"),
     USER_ACCESS_TOKEN_NOT_VERITY(HttpStatus.INTERNAL_SERVER_ERROR, "USER2005", "잘못된 access 토큰 입니다."),
 
+    POST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "POST2001", "게시글 관련 오류"),
+    POST_NOT_EXIST(HttpStatus.NOT_FOUND,"POST2002","없는 게시글입니다"),
+    POST_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "POST2003", "게시글을 작성한 사용자를 찾을 수 없습니다."),
 
+    POST_LIKE_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "POSTLIKE2003", "이미 있는 계정입니다"),
+
+    SEARCH_LOCATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2004", "검색 결과 없음"),
     SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2004", "검색 결과 없음")
     ;
 
