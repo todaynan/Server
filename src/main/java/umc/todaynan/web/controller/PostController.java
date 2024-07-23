@@ -25,8 +25,6 @@ import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 public class PostController {
     @Autowired
     private final PostCommandService postCommandService;
-    @Autowired
-    private final TokenService tokenService;
 
     @Operation(summary = "게시글 작성 API",description = "게시판에 유저가 게시글을 작성하는 API입니다")
     @ApiResponses({
