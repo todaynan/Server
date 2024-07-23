@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
     List<UserLike> findAllByUser(User user);
+    Integer deleteUserLikeByIdAndUser(Long likeId, User user);
 }
