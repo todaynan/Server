@@ -95,39 +95,6 @@ public class PostCommandService implements PostCommandServiceImpl{
             PostLike postLike = toPostLike(user, post);
             return postLikeRepository.save(postLike);
         }
-//        PostLike byUserAndPost = postLikeRepository.findByUserAndPost(user, post)
-//                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_USER_NOT_FOUND));
-//        if(!isExists){
-//            postLikeRepository.findByUserAndPost(user, post);
-//
-//        }
-//            postLikeRepository.save();
-//        }
-//        byUserAndPost.ifPresentOrElse(
-//                () -> {
-//                    new PostHandler(ErrorStatus.POST_USER_NOT_FOUND);
-//                () -> {
-//
-//                    postLikeRepository.save();
-//                }
-//        );
-//                ifPresent(postLikeRepository::delete);
-//
-//
-//        Boolean isLiked = !postLikeRepository.existsByUserAndPost(user, post);
-//        Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
-//        if (!isLiked) {
-//            // 좋아요 처리
-//            PostLike newLike = new PostLike();
-//            newLike.setUser(user);
-//            newLike.setPost(post);
-//            postLikeRepository.save(newLike);
-//        } else {
-//            // 좋아요 취소 처리
-//            postLikeRepository.deleteByUserAndPost(user, post);
-//        }
-//        System.out.println("test9");
-//        return postLikeRepository.save(byUserAndPost);
         return null;
     }
 
