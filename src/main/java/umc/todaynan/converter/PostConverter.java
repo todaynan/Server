@@ -70,6 +70,7 @@ public class PostConverter {
 
     public static PostResponseDTO.LikeResultDTO toLikeResultDTO(PostLike postLike) {
         return PostResponseDTO.LikeResultDTO.builder()
+                .post_like_id(postLike.getId())
 //                .post_like_id(postLike.getId())
                 .post_id(postLike.getPost().getId())
                 .user_id(postLike.getUser().getId())
