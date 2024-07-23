@@ -15,7 +15,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResponseDTO {
+    public static class JoinResultDTO {
         private Long user_id;
         private LocalDateTime created_at;
         private String accessToken;
@@ -26,7 +26,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class AutoLoginResponseDTO {
+    public static class AutoLoginResultDTO {
         private Long user_id;
         private String accessToken;
         private String refreshToken;
@@ -37,7 +37,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginResponseDTO {
+    public static class LoginResultDTO {
         private Long user_id;
         private String accessToken;
         private String refreshToken;
@@ -48,8 +48,8 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UserLikeResponseDTO {
-        private Long like_id;
+    public static class UserLikeResultDTO {
+        private Long id;
         private String title;
         private LocalDateTime created_at;
         private LocalDateTime updated_at;
@@ -59,7 +59,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class GetUserLikeListResponseDTO {
+    public static class GetUserLikeListResultDTO {
         private List<UserLikeItems> userLikeItems;
     }
 
@@ -68,7 +68,7 @@ public class UserResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserLikeItems {
-        private Long like_id;
+        private Long id;
         private String title;
         private PlaceCategory category;
         private String description;

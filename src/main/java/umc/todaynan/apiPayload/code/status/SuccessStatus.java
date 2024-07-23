@@ -21,13 +21,6 @@ public enum SuccessStatus implements BaseCode {
     POST_LIKE_SUCCESS(HttpStatus.OK, "POST2004", "게시글 좋아요 성공"),
 
 
-    USER_LIKE_DELETE_SUCCESS(HttpStatus.OK, "LIKE2001", "좋아요 삭제 성공"),
-    USER_LIKE_COLLECT_SUCCESS(HttpStatus.OK, "LIKE2002", "좋아요 모아보기 성공"),
-    USER_LIKE_SUCCESS(HttpStatus.OK, "LIKE2003", "좋아요 성공"),
-
-
-    USER_SEARCH_SUCCESS(HttpStatus.OK, "SEARCH2003", "검색 성공"),
-
     TOKEN_REFRESHED(HttpStatus.OK,"TOKEN2001", "토큰이 갱신되었습니다.");
 
     private final HttpStatus httpStatus;

@@ -1,25 +1,21 @@
-package umc.todaynan.service.SearchService;
+package umc.todaynan.service.NaverService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import umc.todaynan.web.controller.SearchRestController;
-import umc.todaynan.web.dto.SearchDTO.SearchImageDTO;
+import umc.todaynan.web.dto.SearchDTO.SearchLocationDTO;
 
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
 @Service
-public class SearchImageService {
-    private static final String NAVER_IMAGE_URL = "https://openapi.naver.com/v1/search/image";
+public class NaverLocationService {
+
+    private static final String NAVER_LOCATION_URL = "https://openapi.naver.com/v1/search/local.json";
 
     private final RestTemplate restTemplate;
 
@@ -28,20 +24,16 @@ public class SearchImageService {
 
     @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
     private String naverClientSecret;
-    private static final Logger logger = LoggerFactory.getLogger(SearchRestController.class);
-
-    public SearchImageService(RestTemplate restTemplate) {
+    public NaverLocationService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public Optional<SearchImageDTO.NaverImageInfo> searchImage(String searchString) {
+    public Optional<SearchLocationDTO.NaverLocationInfo> searchLocation(String searchString) {
         try {
-            searchString = searchString.replaceAll("<[^>]*>", "");
-            URI url = UriComponentsBuilder.fromHttpUrl(NAVER_IMAGE_URL)
-                    .queryParam("query", searchString)  // 제목을 검색 쿼리로 사용
-                    .queryParam("display", 1)
+            URI url = UriComponentsBuilder.fromHttpUrl(NAVER_LOCATION_URL)
+                    .queryParam("query", searchString)
+                    .queryParam("display", 5)
                     .queryParam("start", 1)
-                    .queryParam("sort", "sim")
                     .encode(Charset.forName("UTF-8"))
                     .build()
                     .toUri();
@@ -54,8 +46,7 @@ public class SearchImageService {
                     .header("Content-Type", "application/json; charset=UTF-8")
                     .build();
 
-            ResponseEntity<SearchImageDTO.NaverImageInfo> response = restTemplate.exchange(url, HttpMethod.GET, req, SearchImageDTO.NaverImageInfo.class);
-            logger.debug("response body : {}", response.getBody().getItems());
+            ResponseEntity<SearchLocationDTO.NaverLocationInfo> response = restTemplate.exchange(req, SearchLocationDTO.NaverLocationInfo.class);
             return Optional.ofNullable(response.getBody());
         } catch (HttpClientErrorException e) {
             return Optional.empty();

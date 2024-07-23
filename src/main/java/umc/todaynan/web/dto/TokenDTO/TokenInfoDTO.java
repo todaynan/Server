@@ -7,7 +7,7 @@ public class TokenInfoDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class GoogleTokenInfoDTO {
+    public static class GoogleTokenInfo {
 
         private String azp;
         private String aud;
@@ -23,17 +23,17 @@ public class TokenInfoDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class NaverTokenInfoDTO {
+    public static class NaverTokenInfo {
         private String resultcode;
         private String message;
-        private NaverTokenResponseDTO response;
+        private NaverTokenResponse response;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class NaverTokenResponseDTO {
+    public static class NaverTokenResponse {
         private String id;
         private String nickname;
         private String email;

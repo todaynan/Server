@@ -1,27 +1,27 @@
 package umc.todaynan.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import umc.todaynan.apiPayload.ApiResponse;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
-import umc.todaynan.apiPayload.code.status.SuccessStatus;
 import umc.todaynan.converter.SearchConverter;
 import umc.todaynan.converter.UserConverter;
 import umc.todaynan.domain.entity.User.UserLike.UserLike;
-import umc.todaynan.service.GoogleService.GoogleGeminiService;
-import umc.todaynan.service.GoogleService.GoogleSearchService;
-import umc.todaynan.web.dto.SearchDTO.SearchPlaceDTO;
-import umc.todaynan.service.SearchService.SearchImageService;
+import umc.todaynan.service.GoogleService.GeminiService;
+import umc.todaynan.service.NaverService.SearchImageService;
+import umc.todaynan.service.NaverService.SearchLocationService;
 import umc.todaynan.service.UserService.UserService;
 import umc.todaynan.web.dto.SearchDTO.SearchGeminiDTO;
 import umc.todaynan.web.dto.SearchDTO.SearchImageDTO;
+import umc.todaynan.web.dto.SearchDTO.SearchLocationDTO;
+import umc.todaynan.web.dto.SearchDTO.SearchResponseDTO;
 import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,48 +30,58 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/place")
 public class SearchRestController {
-    private final SearchImageService searchImageService;
-    private final GoogleGeminiService googleGeminiService;
+
+    private final SearchLocationService naverLocationService;
+    private final SearchImageService naverImageService;
+    private final GeminiService geminiService;
     private final SearchConverter naverConverter;
     private final UserService userService;
-    private final GoogleSearchService googleSearchService;
-
     private final UserConverter userConverter;
-    private final SearchConverter searchConverter;
+    private static final Logger logger = LoggerFactory.getLogger(SearchRestController.class);
 
     /**
      * 장소 검색 API
      * No Authorization
      */
-    @Operation(summary = "밖 놀거리 검색 API",description = "No Authorization")
     @GetMapping("/search/outside/{searchString}")
-    public ApiResponse<List<SearchPlaceDTO.GooglePlaceResultDTO>> getSearchLocation(
-            @PathVariable(name = "searchString") String searchString) throws IOException {
-        return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString));
+    public ApiResponse<SearchResponseDTO.NaverSearchDTO> getSearchLocation(
+            HttpServletRequest httpServletRequest,
+            @PathVariable(name = "searchString") String searchString) {
+        Optional<SearchLocationDTO.NaverLocationInfo> naverLocationInfo = naverLocationService.searchLocation(searchString , httpServletRequest);
+        if (naverLocationInfo.isPresent()) {
+            List<SearchImageDTO.NaverImageItems> naverImageItemsList = naverLocationInfo.get().getItems().stream()
+                    .map(locationItem -> {
+                        Optional<SearchImageDTO.NaverImageInfo> naverImageInfo = naverImageService.searchImage(locationItem.getTitle());
+                        if (naverImageInfo.isPresent()) {
+                            return naverImageInfo.get().getItems().get(0);
+                        } else {
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+            return ApiResponse.onSuccess(naverConverter.toSearchDTO(naverLocationInfo.get(), naverImageItemsList));
+        } else {
+            return ApiResponse.onFailure(ErrorStatus.SEARCH_ERROR.getCode(), ErrorStatus.SEARCH_ERROR.getMessage(), null);
+        }
     }
-
-    /**
-     * 안에서 놀거리 검색 API
-     */
-    @Operation(summary = "안 놀거리 검색 API",description = "User Jwt Authorization")
     @GetMapping("/search/inside")
     public ApiResponse<SearchGeminiDTO.GeminiResponseDTO> getSearchInside(HttpServletRequest httpServletRequest) throws JsonProcessingException {
-        List<String> userPreferTitleList = userService.getPreferCategoryItems(httpServletRequest);
+        List<String> userPreferTitleList = userService.getPreferCategoryList(httpServletRequest);
 
         if (userPreferTitleList == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
         }else {
             Optional<SearchGeminiDTO.GeminiSearchResultDTO> geminiSearchResultDTO
-                    = googleGeminiService.getGeminiSearch(userPreferTitleList);
+                    = geminiService.getGeminiSearch(userPreferTitleList);
 
             if(geminiSearchResultDTO.isPresent()) {
+                logger.debug("geminiSearchResultDTO : {}" , geminiSearchResultDTO.get().getCandidates().get(0).getContent().getParts().get(0).getText());
                 String result = geminiSearchResultDTO.get().getCandidates().get(0).getContent().getParts().get(0).getText();
 
-                SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO = searchConverter.convertJsonToGeminiResponseDTO(result);
+                SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO = geminiService.convertJsonToGeminiResponseDTO(result);
 
                 List<SearchImageDTO.NaverImageItems> naverImageItemsList = geminiResponseDTO.getGeminiResponseItemDTOList().stream()
                         .map(item -> {
-                            Optional<SearchImageDTO.NaverImageInfo> naverImageInfo = searchImageService.searchImage(item.getTitle());
+                            Optional<SearchImageDTO.NaverImageInfo> naverImageInfo = naverImageService.searchImage(item.getTitle());
                             if (naverImageInfo.isPresent()) {
                                 return naverImageInfo.get().getItems().get(0);
                             } else {
@@ -79,7 +89,7 @@ public class SearchRestController {
                             }
                         }).collect(Collectors.toList());
 
-                return ApiResponse.of(SuccessStatus.USER_SEARCH_SUCCESS, naverConverter.toGeminiSearchDTO(geminiResponseDTO, naverImageItemsList));
+                return ApiResponse.onSuccess(naverConverter.toGeminiSearchDTO(geminiResponseDTO, naverImageItemsList));
             }else {
                 return ApiResponse.onFailure(ErrorStatus.SEARCH_ERROR.getCode(), ErrorStatus.SEARCH_ERROR.getMessage(), null);
             }
@@ -90,18 +100,17 @@ public class SearchRestController {
      * 장소 좋아요 API
      * Authorization -> JWT
      */
-    @Operation(summary = "장소 좋아요 API",description = "User Jwt Authorization")
     @PostMapping("/like")
-    public ApiResponse<UserResponseDTO.UserLikeResponseDTO> postLikeItem(
+    public ApiResponse<UserResponseDTO.UserLikeResultDTO> postLikeLocation(
             HttpServletRequest httpServletRequest,
-            @RequestBody UserRequestDTO.UserLikeRequestDTO userLikeDTO) {
+            @RequestBody UserRequestDTO.UserLikeDTO userLikeDTO) {
 
-        UserLike userLike = userService.createLikeItem(httpServletRequest, userLikeDTO);
+        UserLike userLike = userService.likeLocation(httpServletRequest, userLikeDTO);
 
         if (userLike == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
         }else {
-            return ApiResponse.of(SuccessStatus.USER_LIKE_SUCCESS, userConverter.toUserLikeResponseDTO(userLike));
+            return ApiResponse.onSuccess(userConverter.toUserLikeResultDTO(userLike));
         }
     }
 
@@ -109,34 +118,16 @@ public class SearchRestController {
      * 장소 좋아요 모아보기 API
      * Authorization -> JWT
      */
-    @Operation(summary = "장소 좋아요 모아보기 API",description = "User Jwt Authorization")
     @GetMapping("/like")
-    public ApiResponse<UserResponseDTO.GetUserLikeListResponseDTO> getLikeItems(
+    public ApiResponse<UserResponseDTO.GetUserLikeListResultDTO> getLikeLocationList(
             HttpServletRequest httpServletRequest) {
 
-        UserResponseDTO.GetUserLikeListResponseDTO userLikeListResultList = userService.getLikeItems(httpServletRequest);
+        UserResponseDTO.GetUserLikeListResultDTO userLikeListResultList = userService.likeLocationList(httpServletRequest);
 
         if (userLikeListResultList == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
         }else {
-            return ApiResponse.of(SuccessStatus.USER_LIKE_COLLECT_SUCCESS, userLikeListResultList);
-        }
-    }
-
-    /**
-     * 장소 좋아요 삭제 API
-     * Authorization -> JWT
-     */
-    @Operation(summary = "장소 좋아요 삭제 API",description = "User Jwt Authorization")
-    @DeleteMapping("/like/{like_id}")
-    public ApiResponse<String> deleteLikeItem(
-            HttpServletRequest httpServletRequest,
-            @PathVariable (name = "like_id") Long likeId) {
-
-        if (userService.deleteLikeItem(httpServletRequest, likeId)) {
-            return ApiResponse.of(SuccessStatus.USER_LIKE_DELETE_SUCCESS, null);
-        }else {
-            return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
+            return ApiResponse.onSuccess(userLikeListResultList);
         }
     }
 }

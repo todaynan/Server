@@ -1,6 +1,5 @@
 package umc.todaynan.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +13,8 @@ import umc.todaynan.domain.enums.LoginType;
 import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.repository.UserRepository;
-import umc.todaynan.service.TokenService.NaverTokenService;
-import umc.todaynan.service.TokenService.GoogleTokenService;
+import umc.todaynan.service.NaverService.NaverTokenService;
+import umc.todaynan.service.GoogleService.GoogleTokenService;
 import umc.todaynan.service.UserBlockingService.UserBlockingCommandService;
 import umc.todaynan.service.UserPreferService.UserPreferCommandService;
 import umc.todaynan.service.UserService.UserService;
@@ -47,38 +46,36 @@ public class UserRestController {
      * Header : Social Access Token
      * Access Token -> Verify -> user create
      */
-
-    @Operation(summary = "회원가입 API",description = "Social Access Token Authorization")
     @PostMapping("/signup")
-    public ApiResponse<UserResponseDTO.JoinResponseDTO> signUpUser(
+    public ApiResponse<UserResponseDTO.JoinResultDTO> signUpUser(
             @RequestHeader("accessToken") String accessToken,
             @RequestParam("Login Type") LoginType loginType,
-            @RequestBody UserRequestDTO.JoinUserRequestDTO joinUserDTO) {
+            @RequestBody UserRequestDTO.JoinUserDTO joinUserDTO) {
 
         switch (loginType) {
             case GOOGLE -> {
-                Optional<TokenInfoDTO.GoogleTokenInfoDTO> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
+                Optional<TokenInfoDTO.GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
                 if (googleTokenInfo.isPresent()) {
                     if (userRepository.existsByEmail(googleTokenInfo.get().getEmail())) {
                         return ApiResponse.onFailure(ErrorStatus.USER_EXIST.getCode(), ErrorStatus.USER_EXIST.getMessage(), null);
                     }
-                    User user = userService.signupUser(joinUserDTO, googleTokenInfo.get().getEmail(), loginType);
+                    User user = userService.joinUser(joinUserDTO, googleTokenInfo.get().getEmail(), loginType);
                     Token token = tokenService.generateToken(user.getEmail(), "USER");
-                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResponseDTO(user, token));
+                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResultDTO(user, token));
                 } else {
                     return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
                 }
             }
 
             case NAVER -> {
-                Optional<TokenInfoDTO.NaverTokenInfoDTO> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
+                Optional<TokenInfoDTO.NaverTokenInfo> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
                 if (naverTokenInfo.isPresent()) {
                     if (userRepository.existsByEmail(naverTokenInfo.get().getResponse().getEmail())) {
                         return ApiResponse.onFailure(ErrorStatus.USER_EXIST.getCode(), ErrorStatus.USER_EXIST.getMessage(), null);
                     }
-                    User user = userService.signupUser(joinUserDTO, naverTokenInfo.get().getResponse().getEmail(), loginType);
+                    User user = userService.joinUser(joinUserDTO, naverTokenInfo.get().getResponse().getEmail(), loginType);
                     Token token = tokenService.generateToken(user.getEmail(), "USER");
-                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResponseDTO(user, token));
+                    return ApiResponse.of(SuccessStatus.USER_JOIN, userConverter.toJoinResultDTO(user, token));
                 } else {
                     return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
                 }
@@ -94,8 +91,6 @@ public class UserRestController {
      * Path Variable : NickName
      * No Authentication
      */
-
-    @Operation(summary = "닉네임 중복 확인 API",description = "No Authorization")
     @GetMapping("/signup/{nickName}")
     public ApiResponse<String> verifyNickName(@PathVariable(name = "nickName") String nickName) {
         Boolean verify = userService.verifyNickName(nickName);
@@ -112,10 +107,8 @@ public class UserRestController {
      * Header : JWT Access Token
      * Authentication -> Security
      */
-
-    @Operation(summary = "자동 로그인 API",description = "User Jwt Authorization")
     @GetMapping("/auto-login/")
-    public ApiResponse<UserResponseDTO.AutoLoginResponseDTO> autoLogin(HttpServletRequest httpServletRequest) {
+    public ApiResponse<UserResponseDTO.AutoLoginResultDTO> autoLogin(HttpServletRequest httpServletRequest) {
         return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.autoLoginUser(httpServletRequest));
     }
 
@@ -124,14 +117,12 @@ public class UserRestController {
      * Path Variable : Social Access Token, Login Type
      * Authentication -> Security
      */
-
-    @Operation(summary = "로그인 API",description = "Social Access Token Authorization")
     @GetMapping("/login/")
-    public ApiResponse<UserResponseDTO.LoginResponseDTO> loginUser(@RequestParam("Access Token") String accessToken,
+    public ApiResponse<UserResponseDTO.LoginResultDTO> login(@RequestParam("Access Token") String accessToken,
                                                              @RequestParam("Login Type") LoginType loginType) {
         switch (loginType) {
             case GOOGLE -> {
-                Optional<TokenInfoDTO.GoogleTokenInfoDTO> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
+                Optional<TokenInfoDTO.GoogleTokenInfo> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
                 if (googleTokenInfo.isPresent()) {
                     return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(googleTokenInfo.get().getEmail()));
                 } else {
@@ -140,7 +131,7 @@ public class UserRestController {
             }
 
             case NAVER-> {
-                Optional<TokenInfoDTO.NaverTokenInfoDTO> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
+                Optional<TokenInfoDTO.NaverTokenInfo> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
                 if (naverTokenInfo.isPresent()) {
                     return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(naverTokenInfo.get().getResponse().getEmail()));
                 } else {

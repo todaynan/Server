@@ -1,4 +1,4 @@
-package umc.todaynan.service.TokenService;
+package umc.todaynan.service.GoogleService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ public class GoogleTokenService {
         this.restTemplate = restTemplate;
     }
 
-    public Optional<TokenInfoDTO.GoogleTokenInfoDTO> verifyAccessToken(String accessToken) {
+    public Optional<TokenInfoDTO.GoogleTokenInfo> verifyAccessToken(String accessToken) {
         try {
             String url = UriComponentsBuilder.fromHttpUrl(GOOGLE_TOKENINFO_URL)
                     .queryParam("access_token", accessToken)
                     .toUriString();
 
-            TokenInfoDTO.GoogleTokenInfoDTO tokenInfo = restTemplate.getForObject(url, TokenInfoDTO.GoogleTokenInfoDTO.class);
+            TokenInfoDTO.GoogleTokenInfo tokenInfo = restTemplate.getForObject(url, TokenInfoDTO.GoogleTokenInfo.class);
             return Optional.ofNullable(tokenInfo);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || e.getStatusCode() == HttpStatus.BAD_REQUEST) {

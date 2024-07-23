@@ -19,9 +19,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserConverter {
-    /**
-     * Oauth2 관련
-     */
     public static UserDTO toUserDTO(OAuth2User oAuth2User) {
         var attributes = oAuth2User.getAttributes();
         return UserDTO.builder()
@@ -36,11 +33,9 @@ public class UserConverter {
                 .nickname(user.getNickName())
                 .build();
     }
-    /**
-     * User 관련
-     */
-    public UserResponseDTO.JoinResponseDTO toJoinResponseDTO(User user, Token token) {
-        return UserResponseDTO.JoinResponseDTO.builder()
+
+    public UserResponseDTO.JoinResultDTO toJoinResultDTO(User user, Token token) {
+        return UserResponseDTO.JoinResultDTO.builder()
                 .user_id(user.getId())
                 .created_at(user.getCreatedAt())
                 .accessToken(token.getAccessToken())
@@ -48,7 +43,8 @@ public class UserConverter {
                 .build();
     }
 
-    public static User toUserDTO(UserRequestDTO.JoinUserRequestDTO request, String email, LoginType loginType){
+    public static User toUser(UserRequestDTO.JoinUserDTO request, String email, LoginType loginType){
+
         return User.builder()
                 .nickName(request.getNickName())
                 .email(email)
@@ -60,8 +56,8 @@ public class UserConverter {
                 .build();
     }
 
-    public UserResponseDTO.AutoLoginResponseDTO toAutoLoginResponseDTO(User user, Token token, LocalDateTime date) {
-        return UserResponseDTO.AutoLoginResponseDTO.builder()
+    public UserResponseDTO.AutoLoginResultDTO toAutoLoginResultDTO(User user, Token token, LocalDateTime date) {
+        return UserResponseDTO.AutoLoginResultDTO.builder()
                 .user_id(user.getId())
                 .accessToken(token.getAccessToken())
                 .refreshToken(token.getRefreshToken())
@@ -69,8 +65,8 @@ public class UserConverter {
                 .build();
     }
 
-    public UserResponseDTO.LoginResponseDTO toLoginResponseDTO(User user, Token token, LocalDateTime date) {
-        return UserResponseDTO.LoginResponseDTO.builder()
+    public UserResponseDTO.LoginResultDTO toLoginResultDTO(User user, Token token, LocalDateTime date) {
+        return UserResponseDTO.LoginResultDTO.builder()
                 .user_id(user.getId())
                 .accessToken(token.getAccessToken())
                 .refreshToken(token.getRefreshToken())
@@ -78,7 +74,7 @@ public class UserConverter {
                 .build();
     }
 
-    public UserLike toUserLikeDTO(User user, UserRequestDTO.UserLikeRequestDTO userLikeDTO) {
+    public UserLike toUserLike(User user, UserRequestDTO.UserLikeDTO userLikeDTO) {
         return UserLike.builder()
                 .title(userLikeDTO.getTitle())
                 .user(user)
@@ -89,28 +85,28 @@ public class UserConverter {
                 .build();
     }
 
-    public UserResponseDTO.UserLikeResponseDTO toUserLikeResponseDTO(UserLike userLike) {
-        return UserResponseDTO.UserLikeResponseDTO.builder()
-                .like_id(userLike.getId())
+    public UserResponseDTO.UserLikeResultDTO toUserLikeResultDTO(UserLike userLike) {
+        return UserResponseDTO.UserLikeResultDTO.builder()
+                .id(userLike.getId())
                 .title(userLike.getTitle())
                 .created_at(userLike.getCreatedAt())
                 .updated_at(userLike.getUpdatedAt())
                 .build();
     }
 
-    public UserResponseDTO.GetUserLikeListResponseDTO toUserLikeItemsResponseDTO(List<UserLike> userLikeList) {
+    public UserResponseDTO.GetUserLikeListResultDTO toUserLikeListResultDTO(List<UserLike> userLikeList) {
         List<UserResponseDTO.UserLikeItems> userLikeItemsList = userLikeList.stream()
                 .map(userLike ->
-                        toUserLikeListResponseFromUserLike(userLike)
+                        toUserLikeListResultFromUserLike(userLike)
                 ).collect(Collectors.toList());
-        return UserResponseDTO.GetUserLikeListResponseDTO.builder()
+        return UserResponseDTO.GetUserLikeListResultDTO.builder()
                                 .userLikeItems(userLikeItemsList)
                                 .build();
     }
 
-    public UserResponseDTO.UserLikeItems toUserLikeListResponseFromUserLike(UserLike userLike) {
+    public UserResponseDTO.UserLikeItems toUserLikeListResultFromUserLike(UserLike userLike) {
         return UserResponseDTO.UserLikeItems.builder()
-                .like_id(userLike.getId())
+                .id(userLike.getId())
                 .title(userLike.getTitle())
                 .description(userLike.getDescription())
                 .image(userLike.getImage())
