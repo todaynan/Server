@@ -24,8 +24,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     POST_LIKE_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "POSTLIKE2003", "이미 있는 계정입니다"),
 
-    SEARCH_LOCATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2004", "검색 결과 없음"),
-    SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2004", "검색 결과 없음")
+    SEARCH_LOCATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2001", "검색 결과 없음"),
+    SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2002", "검색 결과 없음"),
+
+    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, " TOKEN2002", "토큰이 만료되었습니다. 재로그인 로직으로 돌아가야 합니다.")
+
     ;
 
     private final HttpStatus httpStatus;

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UserRequestDTO {
     @Getter
-    public static class JoinUserDTO {
+    public static class JoinUserRequestDTO {
         String nickName;
         List<Long> preferCategory;
         String address;
@@ -20,12 +20,12 @@ public class UserRequestDTO {
     }
 
     @Getter
-    public static class LoginUserDTO {
+    public static class LoginUserRequestDTO {
         String email;
     }
 
     @Getter
-    public static class UserLikeDTO {
+    public static class UserLikeRequestDTO {
         String title;
         String description;
         String placeAddress;

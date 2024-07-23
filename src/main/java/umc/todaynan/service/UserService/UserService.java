@@ -11,17 +11,31 @@ import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
 import java.util.List;
 
 public interface UserService {
-    public User join(String registrationId, ProviderUser providerUser);
-    User joinUser(UserRequestDTO.JoinUserDTO joinUserDTO, String email, LoginType loginType);
+    /**
+     * Oauth2 관련 join Service
+     * 사용 X, 유지만...
+     */
+    User join(String registrationId, ProviderUser providerUser);
 
+    /**
+     * User 회원가입, 로그인 관련 Service
+     */
+    User signupUser(UserRequestDTO.JoinUserRequestDTO joinUserDTO, String email, LoginType loginType);
     Boolean verifyNickName(String nickName);
-    UserResponseDTO.AutoLoginResultDTO autoLoginUser(HttpServletRequest httpServletRequest);
-    UserResponseDTO.LoginResultDTO loginUser(String email);
+    UserResponseDTO.AutoLoginResponseDTO autoLoginUser(HttpServletRequest httpServletRequest);
+    UserResponseDTO.LoginResponseDTO loginUser(String email);
 
-    UserLike likeLocation(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeDTO userLikeDTO);
-    UserResponseDTO.GetUserLikeListResultDTO likeLocationList(HttpServletRequest httpServletRequest);
+    /**
+     * User 좋아요 관련 Service
+     */
+    Boolean deleteLikeItem(HttpServletRequest httpServletRequest, Long likeId);
+    UserLike createLikeItem(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeRequestDTO userLikeDTO);
+    UserResponseDTO.GetUserLikeListResponseDTO getLikeItems(HttpServletRequest httpServletRequest);
 
-    List<String> getPreferCategoryList(HttpServletRequest httpServletRequest);
+    /**
+     * User 정보를 기반으로 User Prefer 목록 가져오는 Service
+     */
+    List<String> getPreferCategoryItems(HttpServletRequest httpServletRequest);
 
     void changeNickNameByUserId(long userId, String newNickname);
     void changeMyAddress(long userId, String newAddress);

@@ -73,8 +73,8 @@ public class UserServiceImpl implements UserService{
     }
     @Transactional
     @Override
-    public User joinUser(UserRequestDTO.JoinUserDTO joinUserDTO, String email, LoginType loginType) {
-        User newUser = UserConverter.toUser(joinUserDTO, email, loginType);
+    public User signupUser(UserRequestDTO.JoinUserRequestDTO joinUserDTO, String email, LoginType loginType) {
+        User newUser = UserConverter.toUserDTO(joinUserDTO, email, loginType);
 
         List<PreferCategory> preferCategoryList = joinUserDTO.getPreferCategory().stream()
                 .map(category -> {
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDTO.AutoLoginResultDTO autoLoginUser(HttpServletRequest httpServletRequest) {
+    public UserResponseDTO.AutoLoginResponseDTO autoLoginUser(HttpServletRequest httpServletRequest) {
         String givenToken = tokenService.getJwtFromHeader(httpServletRequest);
         String email = tokenService.getUid(givenToken);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserHandler(ErrorStatus.USER_ERROR));
@@ -114,11 +114,11 @@ public class UserServiceImpl implements UserService{
         Date date = tokenService.getExpiration(newToken.getAccessToken());
         LocalDateTime expiration = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 
-        return userConverter.toAutoLoginResultDTO(user, newToken,expiration);
+        return userConverter.toAutoLoginResponseDTO(user, newToken,expiration);
     }
 
     @Override
-    public UserResponseDTO.LoginResultDTO loginUser(String email) {
+    public UserResponseDTO.LoginResponseDTO loginUser(String email) {
         if(userRepository.existsByEmail(email)) { //이미 존재
             Optional<User> user = userRepository.findByEmail(email);
             Token newToken = tokenService.generateToken(user.get().getEmail(), "USER");
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService{
             Date date = tokenService.getExpiration(newToken.getAccessToken());
             LocalDateTime expiration = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 
-            return userConverter.toLoginResultDTO(user.get(), newToken,expiration);
+            return userConverter.toLoginResponseDTO(user.get(), newToken,expiration);
         }
         else{   //존재 X
             return null;
@@ -134,12 +134,12 @@ public class UserServiceImpl implements UserService{
     }
     @Transactional
     @Override
-    public UserLike likeLocation(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeDTO userLikeDTO) {
+    public UserLike createLikeItem(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeRequestDTO userLikeDTO) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
             Optional<User> user = userRepository.findByEmail(email);
-            UserLike userLike = userConverter.toUserLike(user.get(), userLikeDTO);
+            UserLike userLike = userConverter.toUserLikeDTO(user.get(), userLikeDTO);
 
             return userLikeRepository.save(userLike);
         }
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDTO.GetUserLikeListResultDTO likeLocationList(HttpServletRequest httpServletRequest) {
+    public UserResponseDTO.GetUserLikeListResponseDTO getLikeItems(HttpServletRequest httpServletRequest) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService{
 
             logger.debug("userLikeListResultList : {}", userLikeListResultList);
 
-            return userConverter.toUserLikeListResultDTO(userLikeListResultList);
+            return userConverter.toUserLikeItemsResponseDTO(userLikeListResultList);
         }
         else{   //존재 X
             return null;
@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<String> getPreferCategoryList(HttpServletRequest httpServletRequest) {
+    public List<String> getPreferCategoryItems(HttpServletRequest httpServletRequest) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
@@ -183,6 +183,24 @@ public class UserServiceImpl implements UserService{
         }
         else{   //존재 X
             return null;
+        }
+    }
+
+    @Transactional
+    @Override
+    public Boolean deleteLikeItem(HttpServletRequest httpServletRequest, Long likeId) {
+        String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
+
+        if(userRepository.existsByEmail(email)) { //이미 존재
+            Optional<User> user = userRepository.findByEmail(email);
+            if (userLikeRepository.deleteUserLikeByIdAndUser(likeId, user.get()) > 0) {
+                return true;
+            }else {
+                return false;
+            }
+        }
+        else{   //존재 X
+            return false;
         }
     }
 
