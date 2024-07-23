@@ -59,15 +59,10 @@ public class PostCommandService implements PostCommandServiceImpl{
      * */
     @Override
     public Post updatePost(Long post_id, PostRequestDTO.UpdateDTO request, HttpServletRequest httpServletRequest){
-        System.out.println("test1");
         User user = findUser(httpServletRequest);
-        System.out.println("test2");
         Post post = findPost(post_id, user);
-        System.out.println("test3");
         post.setTitle(request.getTitle());
-        System.out.println("test4");
         post.setContent(request.getContent());
-        System.out.println("test5");
         return postRepository.save(post);
     }
 
@@ -92,14 +87,16 @@ public class PostCommandService implements PostCommandServiceImpl{
     * */
     @Override
     public PostLike likePost(Long post_id, HttpServletRequest httpServletRequest){
-        System.out.println("test1");
         User user = findUser(httpServletRequest);
-        System.out.println("test2");
         Post post = findPost(post_id, user);
-        System.out.println("test3");
+        Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
+        if(!byUserAndPost.isPresent()){
+            log.info("post like not exist");
+            PostLike postLike = toPostLike(user, post);
+            return postLikeRepository.save(postLike);
+        }
 //        PostLike byUserAndPost = postLikeRepository.findByUserAndPost(user, post)
 //                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_USER_NOT_FOUND));
-        Boolean isExists = postLikeRepository.existsByUserAndPost(user, post);
 //        if(!isExists){
 //            postLikeRepository.findByUserAndPost(user, post);
 //
@@ -134,24 +131,25 @@ public class PostCommandService implements PostCommandServiceImpl{
         return null;
     }
 
-    User findUser(HttpServletRequest httpServletRequest){
-        System.out.println("test4");
+    private User findUser(HttpServletRequest httpServletRequest){
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
-        System.out.println("test5");
         User user = userRepository.findByEmail(email) //헤더 정보에서 추출한 이메일로 체크
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_EXIST));
-        System.out.println("test6");
         return user;
     }
 
-    Post findPost(Long post_id, User user){
-        System.out.println("test7") ;
+    private Post findPost(Long post_id, User user){
         Post post = postRepository.findByIdAndUserId(post_id, user.getId())
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
-        System.out.println("test8");
         return post;
     }
 
+    private PostLike toPostLike(User user, Post post) {
+        return PostLike.builder()
+                .user(user)
+                .post(post)
+                .build();
+    }
 //    private PostLike toPostLike(User user, Post post) {
 //        return new PostLike(
 //                post.getId(),
