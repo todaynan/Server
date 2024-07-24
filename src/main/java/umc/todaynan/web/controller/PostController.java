@@ -28,7 +28,7 @@ public class PostController {
 
     @Operation(summary = "게시글 작성 API",description = "게시판에 유저가 게시글을 작성하는 API입니다")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200",description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2001",description = "OK, 성공"),
     })
     @PostMapping("")
     public ApiResponse<PostResponseDTO.CreateResultDTO> createPost(@RequestBody PostRequestDTO.CreateDTO request,
@@ -39,7 +39,7 @@ public class PostController {
 
     @Operation(summary = "게시글 수정 API",description = "유저가 작성한 게시글을 수정하는 API입니다")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200",description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2002",description = "OK, 성공"),
     })
     @Parameters({
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
@@ -53,9 +53,9 @@ public class PostController {
 
     }
 
-    @Operation(summary = "게시글 삭제 API",description = "게시판에 유저가 게시글을 작성하는 API입니다")
+    @Operation(summary = "게시글 삭제 API",description = "게시판에 유저가 게시글을 삭제하는 API입니다")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200",description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2003",description = "OK, 성공"),
     })
     @Parameters({
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
@@ -73,7 +73,7 @@ public class PostController {
 
     @Operation(summary = "게시글 좋아요 API",description = "게시판에 유저가 게시글을 작성하는 API입니다")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200",description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2004",description = "OK, 성공"),
     })
     @Parameters({
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
