@@ -48,7 +48,6 @@ public class ChatResponseDTO {
         Long chatId;
         Long chatRoomId;
         Long userId;
-        Boolean isMine;
         String userNickname;
         String content;
         LocalDateTime createAt;
@@ -61,11 +60,6 @@ public class ChatResponseDTO {
     @AllArgsConstructor
     public static class ChatRoomListDTO {
         List<ChatResponseDTO.ChatRoomDTO> chatRoomList;
-        Integer listSize;
-        Integer totalPage;
-        Long totalElements;
-        Boolean isFirst;
-        Boolean isLast;
     }
 
     // 쪽지함

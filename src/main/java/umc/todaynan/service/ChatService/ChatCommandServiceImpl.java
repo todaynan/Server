@@ -1,9 +1,10 @@
 package umc.todaynan.service.ChatService;
 
-import com.mysql.cj.log.Log;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
@@ -18,6 +19,8 @@ import umc.todaynan.repository.ChatRepository;
 import umc.todaynan.repository.ChatRoomRepository;
 import umc.todaynan.repository.UserRepository;
 import umc.todaynan.web.dto.ChatDTO.ChatRequestDTO;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +62,22 @@ public class ChatCommandServiceImpl implements ChatCommandService{
 
         ChatRoom newChatRoom = ChatRoomConverter.toChatRoom(receiveUser, sendUser);
 
-        chatRoomRepository.save(newChatRoom);
-        return newChatRoom;
+        return chatRoomRepository.save(newChatRoom);
     }
 
+    @Override
+    public Page<Chat> getChatList(Integer page, Long chatRoomId){
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new GeneralException(ErrorStatus.ChatRoom_NOT_FOUND));
+
+
+        return chatRepository.findChatsByChatRoom(chatRoom, PageRequest.of(page, 30));
+    }
+
+    @Override
+    public List<ChatRoom> getChatRoomList(User user){
+
+        return chatRoomRepository.findChatRoomsByUserId(user.getId());
+    }
 
 }
