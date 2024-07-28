@@ -39,7 +39,7 @@ public class PostConverter {
                 .postTitle(post.getTitle())
                 .postLike(post.getPostLikeList().size())
                 .postComment(post.getPostCommentList().size())
-                .createdAt(post.getCreatedAt().toLocalDate())
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 
