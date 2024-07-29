@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import umc.todaynan.domain.enums.PostCategory;
 
+
 public class PostRequestDTO {
     @Getter
     public static class CreatePostDTO{
@@ -26,6 +27,18 @@ public class PostRequestDTO {
 
         @NotBlank
         String title;
+    }
+
+    @Getter
+    public static class CreatePostCommentDTO{
+        @NotBlank
+        String comment;
+    }
+
+    @Getter
+    public static class UpdatePostCommentDTO{
+        @NotBlank
+        String comment;
     }
 
     @Getter

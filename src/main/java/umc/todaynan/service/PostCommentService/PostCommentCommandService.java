@@ -16,7 +16,7 @@ import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.repository.PostCommentLikeRepository;
 import umc.todaynan.repository.PostCommentRepository;
 import umc.todaynan.service.PostService.PostCommandService;
-import umc.todaynan.web.dto.PostCommentDTO.PostCommentRequestDTO;
+import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * 4. PostComment 저장
     * */
     @Override
-    public PostComment createComment(Long post_id, PostCommentRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
+    public PostComment createComment(Long post_id, PostRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = postCommandService.findUser(httpServletRequest);
         Post post = postCommandService.findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
@@ -55,7 +55,7 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * 3. PostComment 저장
     * */
     @Override
-    public PostComment updateComment(Long post_id, Long comment_id, PostCommentRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
+    public PostComment updateComment(Long post_id, Long comment_id, PostRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = postCommandService.findUser(httpServletRequest);
         Post post = postCommandService.findPost(post_id, user);
         PostComment postComment = postCommentRepository.findById(comment_id)

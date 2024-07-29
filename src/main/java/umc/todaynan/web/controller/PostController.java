@@ -18,8 +18,6 @@ import umc.todaynan.domain.entity.Post.PostCommentLike.PostCommentLike;
 import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.service.PostCommentService.PostCommentCommandService;
 import umc.todaynan.service.PostService.PostCommandService;
-import umc.todaynan.web.dto.PostCommentDTO.PostCommentRequestDTO;
-import umc.todaynan.web.dto.PostCommentDTO.PostCommentResponseDTO;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
@@ -37,7 +35,7 @@ public class PostController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2005",description = "OK, 성공"),
     })
     @PostMapping("")
-    public ApiResponse<PostResponseDTO.CreateResultDTO> createPost(@RequestBody PostRequestDTO.CreatePostDTO request,
+    public ApiResponse<PostResponseDTO.CreatePostResultDTO> createPost(@RequestBody PostRequestDTO.CreatePostDTO request,
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.createPost(request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_CREATED, PostConverter.toCreateResultDTO(post));
@@ -51,7 +49,7 @@ public class PostController {
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
     })
     @PatchMapping("/{post_id}")
-    public ApiResponse<PostResponseDTO.UpdateResultDTO> updatePost(@PathVariable("post_id") Long post_id,
+    public ApiResponse<PostResponseDTO.UpdatePostResultDTO> updatePost(@PathVariable("post_id") Long post_id,
                                                                    @RequestBody PostRequestDTO.UpdatePostDTO request,
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.updatePost(post_id, request, httpServletRequest);
@@ -85,7 +83,7 @@ public class PostController {
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
     })
     @PostMapping("/like/{post_id}")
-    public ApiResponse<PostResponseDTO.LikeResultDTO> likePost(@PathVariable("post_id") Long post_id,
+    public ApiResponse<PostResponseDTO.LikePostResultDTO> likePost(@PathVariable("post_id") Long post_id,
 //                                                               @RequestBody PostRequestDTO.LikeDTO request,
                                                                HttpServletRequest httpServletRequest){
         PostLike postLike = postCommandService.likePost(post_id, httpServletRequest);
@@ -100,8 +98,8 @@ public class PostController {
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다")
     })
     @PostMapping("/comment/{post_id}")
-    public ApiResponse<PostCommentResponseDTO.CreateResultDTO> createPostComment(@PathVariable("post_id") Long post_id,
-                                                                                 @RequestBody PostCommentRequestDTO.CreatePostCommentDTO request,
+    public ApiResponse<PostResponseDTO.CreatePostCommentResultDTO> createPostComment(@PathVariable("post_id") Long post_id,
+                                                                                 @RequestBody PostRequestDTO.CreatePostCommentDTO request,
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.createComment(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_CREATED, PostCommentConverter.toCreateResultDTO(postComment));
@@ -117,9 +115,9 @@ public class PostController {
             @Parameter(name = "comment_id", description = "댓글의 id, path variable 입니다")
     })
     @PatchMapping("/comment/{post_id}/{comment_id}")
-    public ApiResponse<PostCommentResponseDTO.UpdateResultDTO> updatePostComment(@PathVariable("post_id") Long post_id,
+    public ApiResponse<PostResponseDTO.UpdatePostCommentResultDTO> updatePostComment(@PathVariable("post_id") Long post_id,
                                                                                  @PathVariable("comment_id") Long comment_id,
-                                                                                 @RequestBody PostCommentRequestDTO.UpdatePostCommentDTO request,
+                                                                                 @RequestBody PostRequestDTO.UpdatePostCommentDTO request,
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.updateComment(post_id, comment_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_UPDATED, PostCommentConverter.toUpdateResultDTO(postComment));
@@ -154,7 +152,7 @@ public class PostController {
             @Parameter(name = "comment_id", description = "댓글의 id, path variable 입니다")
     })
     @DeleteMapping("/comment/like/{post_id}/{comment_id}")
-    public ApiResponse<PostCommentResponseDTO.LikeResultDTO> likePostComment(@PathVariable("post_id") Long post_id,
+    public ApiResponse<PostResponseDTO.LikePostCommentResultDTO> likePostComment(@PathVariable("post_id") Long post_id,
                                                                              @PathVariable("comment_id") Long comment_id,
                                                                              HttpServletRequest httpServletRequest){
         PostCommentLike postCommentLike = postCommentCommandService.likeComment(post_id, comment_id, httpServletRequest);

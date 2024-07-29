@@ -17,7 +17,7 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreateResultDTO{ //글 작성
+    public static class CreatePostResultDTO{ //글 작성
         private Long post_id;
         private Long user_id;
         private String title;
@@ -31,7 +31,7 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UpdateResultDTO{
+    public static class UpdatePostResultDTO{
         private Long post_id;
         private Long user_id;
         private String title;
@@ -74,9 +74,41 @@ public class PostResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LikeResultDTO {
+    public static class LikePostResultDTO {
         private Long post_like_id;
         private Long post_id;
+        private Long user_id;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CreatePostCommentResultDTO{
+        private Long post_comment_id;
+        private Long post_id;
+        private Long user_id;
+        private String comment;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdatePostCommentResultDTO{
+        private Long post_comment_id;
+        private Long post_id;
+        private Long user_id;
+        private String comment;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LikePostCommentResultDTO{
+        private Long post_comment_like_id;
+        private Long post_comment_id;
         private Long user_id;
     }
 }

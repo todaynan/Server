@@ -20,8 +20,8 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.CreateResultDTO toCreateResultDTO(Post post) {
-        return PostResponseDTO.CreateResultDTO.builder()
+    public static PostResponseDTO.CreatePostResultDTO toCreateResultDTO(Post post) {
+        return PostResponseDTO.CreatePostResultDTO.builder()
                 .post_id(post.getId())
                 .user_id(post.getUser().getId())
                 .title(post.getTitle())
@@ -57,8 +57,8 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.UpdateResultDTO toUpdateResultDTO(Post post) {
-        return PostResponseDTO.UpdateResultDTO.builder()
+    public static PostResponseDTO.UpdatePostResultDTO toUpdateResultDTO(Post post) {
+        return PostResponseDTO.UpdatePostResultDTO.builder()
                 .post_id(post.getId())
                 .user_id(post.getUser().getId())
                 .title(post.getTitle())
@@ -68,8 +68,8 @@ public class PostConverter {
     }
 
 
-    public static PostResponseDTO.LikeResultDTO toLikeResultDTO(PostLike postLike) {
-        return PostResponseDTO.LikeResultDTO.builder()
+    public static PostResponseDTO.LikePostResultDTO toLikeResultDTO(PostLike postLike) {
+        return PostResponseDTO.LikePostResultDTO.builder()
                 .post_like_id(postLike.getId())
 //                .post_like_id(postLike.getId())
                 .post_id(postLike.getPost().getId())
