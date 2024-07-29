@@ -133,6 +133,9 @@ public class UserRestController {
             case GOOGLE -> {
                 Optional<TokenInfoDTO.GoogleTokenInfoDTO> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
                 if (googleTokenInfo.isPresent()) {
+                    if (!userRepository.existsByEmail(googleTokenInfo.get().getEmail())) {
+                        return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
+                    }
                     return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(googleTokenInfo.get().getEmail()));
                 } else {
                     return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
@@ -142,6 +145,9 @@ public class UserRestController {
             case NAVER-> {
                 Optional<TokenInfoDTO.NaverTokenInfoDTO> naverTokenInfo = naverTokenService.verifyAccessToken(accessToken);
                 if (naverTokenInfo.isPresent()) {
+                    if (!userRepository.existsByEmail(naverTokenInfo.get().getResponse().getEmail())) {
+                        return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
+                    }
                     return ApiResponse.of(SuccessStatus.USER_LOGIN, userService.loginUser(naverTokenInfo.get().getResponse().getEmail()));
                 } else {
                     return ApiResponse.onFailure(ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getCode(), ErrorStatus.USER_ACCESS_TOKEN_NOT_VERITY.getMessage(), null);
