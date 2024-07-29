@@ -98,14 +98,14 @@ public class PostCommandService implements PostCommandServiceImpl{
         return null;
     }
 
-    private User findUser(HttpServletRequest httpServletRequest){
+    public User findUser(HttpServletRequest httpServletRequest){
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
         User user = userRepository.findByEmail(email) //헤더 정보에서 추출한 이메일로 체크
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_EXIST));
         return user;
     }
 
-    private Post findPost(Long post_id, User user){
+    public Post findPost(Long post_id, User user){
         Post post = postRepository.findByIdAndUserId(post_id, user.getId())
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         return post;
