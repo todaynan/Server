@@ -34,6 +34,7 @@ public class ChatConverter {
 
     public static ChatResponseDTO.ChatDTO toChatDTO(Chat chat) {
         return ChatResponseDTO.ChatDTO.builder()
+                .chatId(chat.getId())
                 .chatRoomId(chat.getChatRoom().getId())
                 .userId(chat.getUser().getId())
                 .userNickname(chat.getUser().getNickName())
