@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import umc.todaynan.domain.enums.PostCategory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostResponseDTO {
@@ -66,7 +67,7 @@ public class PostResponseDTO {
         String postContent;
         Integer postLike;
         Integer postComment;
-        LocalDate createdAt;
+        LocalDateTime createdAt;
     }
 
     @Builder

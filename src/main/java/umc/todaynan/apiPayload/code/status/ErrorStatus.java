@@ -27,7 +27,9 @@ public enum ErrorStatus implements BaseErrorCode {
     SEARCH_LOCATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2001", "검색 결과 없음"),
     SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SEARCH2002", "검색 결과 없음"),
 
-    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, " TOKEN2002", "토큰이 만료되었습니다. 재로그인 로직으로 돌아가야 합니다.")
+    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, " TOKEN2002", "토큰이 만료되었습니다. 재로그인 로직으로 돌아가야 합니다."),
+
+    ChatRoom_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM2001", "해당하는 채팅방을 찾을 수 없습니다.")
 
     ;
 
