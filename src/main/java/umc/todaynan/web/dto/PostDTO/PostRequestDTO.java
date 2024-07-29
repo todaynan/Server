@@ -6,7 +6,7 @@ import umc.todaynan.domain.enums.PostCategory;
 
 public class PostRequestDTO {
     @Getter
-    public static class CreateDTO{
+    public static class CreatePostDTO{
         @NotBlank
         String content;
 
@@ -20,7 +20,7 @@ public class PostRequestDTO {
     }
 
     @Getter
-    public static class UpdateDTO{
+    public static class UpdatePostDTO{
         @NotBlank
         String content;
 

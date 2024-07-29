@@ -37,8 +37,8 @@ public interface UserService {
      */
     List<String> getPreferCategoryItems(HttpServletRequest httpServletRequest);
 
-    void changeNickNameByUserId(long userId, String newNickname);
-    void changeMyAddress(long userId, String newAddress);
+    void changeNickNameByUserId(long userId, UserRequestDTO.UserGeneralRequestDTO newNickname);
+    void changeMyAddress(long userId, UserRequestDTO.UserGeneralRequestDTO newAddress);
     void userSignOut(long userId);
     long findUserIdByEmail(String email);
 }

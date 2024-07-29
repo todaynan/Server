@@ -6,7 +6,7 @@ import umc.todaynan.web.dto.PostCommentDTO.PostCommentRequestDTO;
 import umc.todaynan.web.dto.PostCommentDTO.PostCommentResponseDTO;
 
 public class PostCommentConverter {
-    public static PostComment toPostComment(PostCommentRequestDTO.CreateDTO request) {
+    public static PostComment toPostComment(PostCommentRequestDTO.CreatePostCommentDTO request) {
         return PostComment.builder()
                 .comment(request.getComment())
                 .build();

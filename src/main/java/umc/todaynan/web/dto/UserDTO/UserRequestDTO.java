@@ -32,4 +32,15 @@ public class UserRequestDTO {
         String image;
         PlaceCategory category;
     }
+
+
+    @Getter
+    public static class UserGeneralRequestDTO {
+        String request;
+    }
+
+    @Getter
+    public static class UserInterestRequestDTO {
+        List<Integer> interestList;
+    }
 }

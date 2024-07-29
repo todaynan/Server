@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class PostConverter {
 
-    public static Post toPost(PostRequestDTO.CreateDTO request) {
+    public static Post toPost(PostRequestDTO.CreatePostDTO request) {
         return Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())

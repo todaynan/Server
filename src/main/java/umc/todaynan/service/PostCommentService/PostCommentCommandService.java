@@ -38,7 +38,7 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * 4. PostComment 저장
     * */
     @Override
-    public PostComment createComment(Long post_id, PostCommentRequestDTO.CreateDTO request, HttpServletRequest httpServletRequest) {
+    public PostComment createComment(Long post_id, PostCommentRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = postCommandService.findUser(httpServletRequest);
         Post post = postCommandService.findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
@@ -55,7 +55,7 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * 3. PostComment 저장
     * */
     @Override
-    public PostComment updateComment(Long post_id, Long comment_id, PostCommentRequestDTO.UpdateDTO request, HttpServletRequest httpServletRequest) {
+    public PostComment updateComment(Long post_id, Long comment_id, PostCommentRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = postCommandService.findUser(httpServletRequest);
         Post post = postCommandService.findPost(post_id, user);
         PostComment postComment = postCommentRepository.findById(comment_id)

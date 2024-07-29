@@ -11,6 +11,7 @@ import umc.todaynan.domain.entity.User.UserPrefer.UserPrefer;
 
 import java.util.List;
 
+import static umc.todaynan.domain.entity.User.User.QUser.user;
 import static umc.todaynan.domain.entity.User.UserPrefer.QPreferCategory.preferCategory;
 import static umc.todaynan.domain.entity.User.UserPrefer.QUserPrefer.userPrefer;
 
@@ -25,35 +26,26 @@ public class UserPreferQueryDslRepository {
         this.query = new JPAQueryFactory(em);
     }
 
-    public void changePreferList(long userId, List<String> interests) {
+    public void changePreferList(long userId, List<Integer> interests) {
         query.delete(userPrefer)
                 .where(userPrefer.user.id.eq(userId))
                 .execute();
         log.info("[Repository - UserPreferQueryDslRepository] {}의 관심사 모두 제거", userId);
 
-        User user = query.selectFrom(QUser.user)
-                .where(QUser.user.id.eq(userId))
-                .fetchOne();
-
-        for (String interest : interests) {
-            Long preferCategoryId = query.select(preferCategory.id)
-                    .from(preferCategory)
-                    .where(preferCategory.title.eq(interest))
-                    .fetchOne();
-
-
-            if (preferCategoryId != null) {
-                PreferCategory newCategory = query.select(preferCategory)
-                        .where(preferCategory.id.eq(preferCategoryId))
-                        .fetchOne();
-
-                UserPrefer newUserPrefer = UserPrefer.builder()
-                        .user(user)
-                        .preferCategory(newCategory)
-                        .build();
-
-                em.persist(newUserPrefer);
-            }
+        for (Integer interest : interests) {
+            UserPrefer build = UserPrefer.builder()
+                    .preferCategory(
+                            query.select(preferCategory)
+                                    .from(preferCategory)
+                                    .where(preferCategory.id.eq(Long.valueOf(interest)))
+                                    .fetchOne())
+                    .user(
+                            query.select(user)
+                                    .from(user)
+                                    .where(user.id.eq(userId))
+                                    .fetchOne())
+                    .build();
+            em.persist(build);
         }
         log.info("[Repository - UserPreferQueryDslRepository] 유저 관심사 변경 Repository 성공");
     }

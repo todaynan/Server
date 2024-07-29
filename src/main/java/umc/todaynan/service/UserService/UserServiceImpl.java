@@ -206,22 +206,22 @@ public class UserServiceImpl implements UserService{
 
     @Transactional
     @Override
-    public void changeNickNameByUserId(long userId, String newNickname) {
+    public void changeNickNameByUserId(long userId, UserRequestDTO.UserGeneralRequestDTO newNickname) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("해당 학번의 학생을 찾지 못했습니다.")
         );
-        user.setNickName(newNickname);
+        user.setNickName(newNickname.getRequest());
         log.info("[UserService - changeNickNameByUserId] user : {}", user.getNickName());
         userRepository.save(user);
         log.info("[UserService - changeNickNameByUserId] {}번 유저의 닉네임이 {}로 변경되었습니다.", userId, newNickname);
     }
     @Transactional
     @Override
-    public void changeMyAddress(long userId, String newAddress) {
+    public void changeMyAddress(long userId, UserRequestDTO.UserGeneralRequestDTO newAddress) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("해당 학번의 학생을 찾지 못했습니다.")
         );
-        user.setAddress(newAddress);
+        user.setAddress(newAddress.getRequest());
         userRepository.save(user);
         log.info("[UserService - changeNickNameByUserId] {}번 유저의 주소가 {}로 변경되었습니다.", userId, newAddress);
     }

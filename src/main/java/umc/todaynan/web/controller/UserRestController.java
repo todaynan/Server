@@ -155,7 +155,7 @@ public class UserRestController {
     }
 
     @PatchMapping("/nickname")
-    public ApiResponse<UserResponseDTO.UserModifyDTO> changeUserNickName(HttpServletRequest request, @RequestBody String Nickname) {
+    public ApiResponse<UserResponseDTO.UserModifyDTO> changeUserNickName(HttpServletRequest request, @RequestBody UserRequestDTO.UserGeneralRequestDTO Nickname) {
         String givenToken = tokenService.getJwtFromHeader(request);
         String email = tokenService.getUid(givenToken);
 
@@ -173,7 +173,7 @@ public class UserRestController {
     }
 
     @PatchMapping("/address")
-    public ApiResponse<UserResponseDTO.UserModifyDTO> changeUserAddress(HttpServletRequest request, @RequestBody String MyTown) {
+    public ApiResponse<UserResponseDTO.UserModifyDTO> changeUserAddress(HttpServletRequest request, @RequestBody UserRequestDTO.UserGeneralRequestDTO MyTown) {
         String givenToken = tokenService.getJwtFromHeader(request);
         String email = tokenService.getUid(givenToken);
 
@@ -192,15 +192,15 @@ public class UserRestController {
     }
 
     @PatchMapping("/interest")
-    public ApiResponse<UserResponseDTO.UserModifyDTO> changeInterest(HttpServletRequest request, @RequestBody List<String> prefer_list) {
+    public ApiResponse<UserResponseDTO.UserModifyDTO> changeInterest(HttpServletRequest request, @RequestBody UserRequestDTO.UserInterestRequestDTO preferList) {
         String givenToken = tokenService.getJwtFromHeader(request);
         String email = tokenService.getUid(givenToken);
 
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isPresent()) {
-            log.info("[UserController - changeInterest] {}번 유저의 관심사를 {}로 수정합니다", user.get().getId(), prefer_list);
-            userPreferCommandService.changeMyInterset(user.get().getId(), prefer_list);
+            log.info("[UserController - changeInterest] {}번 유저의 관심사를 {}로 수정합니다", user.get().getId(), preferList);
+            userPreferCommandService.changeMyInterset(user.get().getId(), preferList.getInterestList());
             UserResponseDTO.UserModifyDTO responseDto = new UserResponseDTO.UserModifyDTO();
             responseDto.setMessage("관심사 수정 완료");
             return ApiResponse.onSuccess(responseDto);
@@ -229,7 +229,7 @@ public class UserRestController {
     }
 
     @PostMapping("/block")
-    public ApiResponse<UserResponseDTO.UserModifyDTO> userBlock(HttpServletRequest request, @RequestBody String BlockUserNickName) {
+    public ApiResponse<UserResponseDTO.UserModifyDTO> userBlock(HttpServletRequest request, @RequestBody UserRequestDTO.UserGeneralRequestDTO BlockUserNickName) {
         String givenToken = tokenService.getJwtFromHeader(request);
         String email = tokenService.getUid(givenToken);
 

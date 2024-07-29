@@ -5,13 +5,13 @@ import lombok.Getter;
 
 public class PostCommentRequestDTO {
     @Getter
-    public static class CreateDTO{
+    public static class CreatePostCommentDTO{
         @NotBlank
         String comment;
     }
 
     @Getter
-    public static class UpdateDTO{
+    public static class UpdatePostCommentDTO{
         @NotBlank
         String comment;
     }

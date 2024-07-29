@@ -44,7 +44,7 @@ public class PostCommandService implements PostCommandServiceImpl{
      * */
     @Transactional
     @Override
-    public Post createPost(PostRequestDTO.CreateDTO request, HttpServletRequest httpServletRequest) {
+    public Post createPost(PostRequestDTO.CreatePostDTO request, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
         Post post = PostConverter.toPost(request);
         post.setUser(user);
@@ -58,7 +58,7 @@ public class PostCommandService implements PostCommandServiceImpl{
      * 3. Post 저장
      * */
     @Override
-    public Post updatePost(Long post_id, PostRequestDTO.UpdateDTO request, HttpServletRequest httpServletRequest){
+    public Post updatePost(Long post_id, PostRequestDTO.UpdatePostDTO request, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
         Post post = findPost(post_id, user);
         post.setTitle(request.getTitle());

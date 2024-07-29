@@ -6,8 +6,8 @@ import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 
 public interface PostCommandServiceImpl {
-    public Post createPost(PostRequestDTO.CreateDTO request, HttpServletRequest httpServletRequest);
-    public Post updatePost(Long post_id, PostRequestDTO.UpdateDTO request, HttpServletRequest httpServletRequest);
+    public Post createPost(PostRequestDTO.CreatePostDTO request, HttpServletRequest httpServletRequest);
+    public Post updatePost(Long post_id, PostRequestDTO.UpdatePostDTO request, HttpServletRequest httpServletRequest);
     public Boolean deletePost(Long post_id, HttpServletRequest httpServletRequest);
     public PostLike likePost(Long post_id, HttpServletRequest httpServletRequest);
 }

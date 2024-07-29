@@ -37,7 +37,7 @@ public class PostController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2005",description = "OK, 성공"),
     })
     @PostMapping("")
-    public ApiResponse<PostResponseDTO.CreateResultDTO> createPost(@RequestBody PostRequestDTO.CreateDTO request,
+    public ApiResponse<PostResponseDTO.CreateResultDTO> createPost(@RequestBody PostRequestDTO.CreatePostDTO request,
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.createPost(request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_CREATED, PostConverter.toCreateResultDTO(post));
@@ -52,7 +52,7 @@ public class PostController {
     })
     @PatchMapping("/{post_id}")
     public ApiResponse<PostResponseDTO.UpdateResultDTO> updatePost(@PathVariable("post_id") Long post_id,
-                                                                   @RequestBody PostRequestDTO.UpdateDTO request,
+                                                                   @RequestBody PostRequestDTO.UpdatePostDTO request,
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.updatePost(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_UPDATED, PostConverter.toUpdateResultDTO(post));
@@ -101,7 +101,7 @@ public class PostController {
     })
     @PostMapping("/comment/{post_id}")
     public ApiResponse<PostCommentResponseDTO.CreateResultDTO> createPostComment(@PathVariable("post_id") Long post_id,
-                                                                                 @RequestBody PostCommentRequestDTO.CreateDTO request,
+                                                                                 @RequestBody PostCommentRequestDTO.CreatePostCommentDTO request,
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.createComment(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_CREATED, PostCommentConverter.toCreateResultDTO(postComment));
@@ -119,7 +119,7 @@ public class PostController {
     @PatchMapping("/comment/{post_id}/{comment_id}")
     public ApiResponse<PostCommentResponseDTO.UpdateResultDTO> updatePostComment(@PathVariable("post_id") Long post_id,
                                                                                  @PathVariable("comment_id") Long comment_id,
-                                                                                 @RequestBody PostCommentRequestDTO.UpdateDTO request,
+                                                                                 @RequestBody PostCommentRequestDTO.UpdatePostCommentDTO request,
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.updateComment(post_id, comment_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_UPDATED, PostCommentConverter.toUpdateResultDTO(postComment));
