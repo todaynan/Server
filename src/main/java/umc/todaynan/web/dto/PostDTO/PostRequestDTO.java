@@ -16,8 +16,6 @@ public class PostRequestDTO {
 
         @NotBlank
         PostCategory category;
-
-        //location?
     }
 
     @Getter
