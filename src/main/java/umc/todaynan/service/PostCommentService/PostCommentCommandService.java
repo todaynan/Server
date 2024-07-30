@@ -8,16 +8,23 @@ import org.springframework.stereotype.Service;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
 import umc.todaynan.apiPayload.exception.handler.PostCommentHandler;
 import umc.todaynan.apiPayload.exception.handler.PostCommentLikeHandler;
+import umc.todaynan.apiPayload.exception.handler.PostHandler;
+import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.PostCommentConverter;
 import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.entity.Post.PostCommentLike.PostCommentLike;
 import umc.todaynan.domain.entity.User.User.User;
+import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.repository.PostCommentLikeRepository;
 import umc.todaynan.repository.PostCommentRepository;
+import umc.todaynan.repository.PostRepository;
+import umc.todaynan.repository.UserRepository;
 import umc.todaynan.service.PostService.PostCommandService;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 
+import javax.xml.stream.events.Comment;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,9 +34,13 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Autowired
     private final PostCommentRepository postCommentRepository;
     @Autowired
-    private final PostCommandService postCommandService;
-    @Autowired
     private final PostCommentLikeRepository postCommentLikeRepository;
+    @Autowired
+    private final TokenService tokenService;
+    @Autowired
+    private final PostRepository postRepository;
+    @Autowired
+    private final UserRepository userRepository;
     /*
     * 댓글 생성 API
     * 1. User 확인
@@ -39,8 +50,8 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * */
     @Override
     public PostComment createComment(Long post_id, PostRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
-        User user = postCommandService.findUser(httpServletRequest);
-        Post post = postCommandService.findPost(post_id, user);
+        User user = findUser(httpServletRequest);
+        Post post = findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
         postComment.setPost(post);
         postComment.setUser(user);
@@ -56,8 +67,8 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * */
     @Override
     public PostComment updateComment(Long post_id, Long comment_id, PostRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
-        User user = postCommandService.findUser(httpServletRequest);
-        Post post = postCommandService.findPost(post_id, user);
+        User user = findUser(httpServletRequest);
+        Post post = findPost(post_id, user);
         PostComment postComment = postCommentRepository.findById(comment_id)
                 .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
         postComment.setComment(request.getComment());
@@ -71,8 +82,8 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
      * */
     @Override
     public Boolean deleteComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
-        User user = postCommandService.findUser(httpServletRequest);
-        Post post = postCommandService.findPost(post_id, user);
+        User user = findUser(httpServletRequest);
+        Post post = findPost(post_id, user);
         postCommentRepository.deleteById(comment_id);
         return true;
     }
@@ -85,8 +96,8 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * */
     @Override
     public PostCommentLike likeComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
-        User user = postCommandService.findUser(httpServletRequest);
-        Post post = postCommandService.findPost(post_id, user);
+        User user = findUser(httpServletRequest);
+        Post post = findPost(post_id, user);
         Optional<PostCommentLike> byUserIdAndPostCommentId = postCommentLikeRepository.findByUserIdAndPostCommentId(user.getId(), comment_id);
         if(!byUserIdAndPostCommentId.isPresent()) {
             log.info("postcomment like not exist");
@@ -96,6 +107,31 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
             return postCommentLikeRepository.save(postCommentLike);
         }
         return null;
+    }
+
+    /*
+    * 게시글 댓글 조회 API
+    * 1. User 확인
+    * 2. 해당 Post의 모든 PostComment 조회
+    * */
+    @Override
+    public List<PostComment> getPostCommentList(Long post_id, HttpServletRequest httpServletRequest){
+        List<PostComment> byPostId = postCommentRepository.findByPostId(post_id);
+
+        return byPostId;
+    }
+
+    public User findUser(HttpServletRequest httpServletRequest){
+        String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
+        User user = userRepository.findByEmail(email) //헤더 정보에서 추출한 이메일로 체크
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_EXIST));
+        return user;
+    }
+
+    public Post findPost(Long post_id, User user){
+        Post post = postRepository.findByIdAndUserId(post_id, user.getId())
+                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+        return post;
     }
 
     private PostCommentLike toPostCommentLike(User user, PostComment postComment) {

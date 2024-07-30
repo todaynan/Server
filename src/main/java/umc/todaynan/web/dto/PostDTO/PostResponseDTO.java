@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import umc.todaynan.domain.entity.Post.Post.Post;
+import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.enums.PostCategory;
+import umc.todaynan.service.PostService.PostCommandService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -78,6 +81,20 @@ public class PostResponseDTO {
         private Long post_like_id;
         private Long post_id;
         private Long user_id;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostDetailResultDTO {
+        private Long post_id;
+        private String nick_name;
+        private String title;
+        private String content;
+        private Long post_like_cnt;
+        private List<PostCommandService.PostCommentListDTO> postCommentList;
+
     }
 
     @Builder

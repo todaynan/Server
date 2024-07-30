@@ -1,7 +1,7 @@
 package umc.todaynan.service.PostService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,15 +12,18 @@ import umc.todaynan.apiPayload.exception.handler.PostLikeHandler;
 import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.PostConverter;
 import umc.todaynan.domain.entity.Post.Post.Post;
+import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.oauth2.TokenService;
-import umc.todaynan.repository.PostLikeRepository;
-import umc.todaynan.repository.PostRepository;
-import umc.todaynan.repository.UserRepository;
+import umc.todaynan.repository.*;
+import umc.todaynan.service.PostCommentService.PostCommentCommandService;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
+import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,11 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Autowired
     private final PostLikeRepository postLikeRepository;
     @Autowired
+    private final PostCommentCommandService postCommentCommandService;
+    @Autowired
     private final TokenService tokenService;
+    @Autowired
+    private PostCommentLikeRepository postCommentLikeRepository;
 
     /*
      * 게시글 생성 API
@@ -98,6 +105,30 @@ public class PostCommandService implements PostCommandServiceImpl{
         return null;
     }
 
+    /*
+     * 게시글 세부사항 조회 API
+     * 1. User 확인
+     * 2. User가 쓴 Post 확인
+     * 3. Post 세부정보 조회 -> 페이징 사용하지 않고 리스트 형태로 PostComment 반환
+     * */
+    @Override
+    public PostResponseDTO.PostDetailResultDTO getPostDetail(Long post_id, HttpServletRequest httpServletRequest){
+        User user = findUser(httpServletRequest);
+        Post post = findPost(post_id, user);
+        Long post_like_cnt = postLikeRepository.countByPostId(post_id);
+        List<PostComment> postCommentList = postCommentCommandService.getPostCommentList(post_id, httpServletRequest);
+        List<PostCommentListDTO> post_comments = postCommentList.stream()
+                .map(postComment -> new PostCommentListDTO(
+                        postComment.getId(),
+                        postComment.getUser().getNickName(),
+                        postComment.getComment(),
+                        postComment.getPostCommentLikeList().size()
+                ))
+                .collect(Collectors.toList());
+
+        return toPostDetailResultDTO(post, post_like_cnt, post_comments);
+    }
+
     public User findUser(HttpServletRequest httpServletRequest){
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
         User user = userRepository.findByEmail(email) //헤더 정보에서 추출한 이메일로 체크
@@ -117,13 +148,26 @@ public class PostCommandService implements PostCommandServiceImpl{
                 .post(post)
                 .build();
     }
-//    private PostLike toPostLike(User user, Post post) {
-//        return new PostLike(
-//                post.getId(),
-//                post.getTitle(),
-//                post.getContent(),
-////                post.getAuthor().getName()
-//        );
-//    }
 
+    public static PostResponseDTO.PostDetailResultDTO toPostDetailResultDTO(Post post, Long post_cnt, List<PostCommentListDTO> post_comments) {
+        return PostResponseDTO.PostDetailResultDTO.builder()
+                .post_id(post.getId())
+                .nick_name(post.getUser().getNickName())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .post_like_cnt(post_cnt)
+                .postCommentList(post_comments)
+                .build();
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PostCommentListDTO{
+        private Long post_comment_id;
+        private String nick_name;
+        private String content;
+        private Integer post_comment_like_cnt;
+    }
 }

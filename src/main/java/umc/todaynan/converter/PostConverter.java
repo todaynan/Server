@@ -2,6 +2,7 @@ package umc.todaynan.converter;
 
 import org.springframework.data.domain.Page;
 import umc.todaynan.domain.entity.Post.Post.Post;
+import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
@@ -71,11 +72,11 @@ public class PostConverter {
     public static PostResponseDTO.LikePostResultDTO toLikeResultDTO(PostLike postLike) {
         return PostResponseDTO.LikePostResultDTO.builder()
                 .post_like_id(postLike.getId())
-//                .post_like_id(postLike.getId())
                 .post_id(postLike.getPost().getId())
                 .user_id(postLike.getUser().getId())
                 .build();
     }
+
 }
 
 

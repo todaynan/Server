@@ -19,6 +19,7 @@ public enum SuccessStatus implements BaseCode {
     POST_UPDATED(HttpStatus.OK, "POST2006", "게시글 수정 성공"),
     POST_DELETED(HttpStatus.OK, "POST2007", "게시글 삭제 성공"),
     POST_LIKE_SUCCESS(HttpStatus.OK, "POST2008", "게시글 좋아요 성공"),
+    POST_DETAIL_SUCCESS(HttpStatus.OK, "POST2009", "게시글 세부정보 조회 성공"),
 
     POST_COMMENT_CREATED(HttpStatus.OK, "COMMENT2004", "댓글 작성 성공"),
     POST_COMMENT_UPDATED(HttpStatus.OK, "COMMENT2005", "댓글 수정 성공"),

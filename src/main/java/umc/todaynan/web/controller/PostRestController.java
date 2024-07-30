@@ -28,6 +28,7 @@ import umc.todaynan.service.PostService.PostQueryService;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 @Validated
@@ -161,7 +162,6 @@ public class PostRestController {
     })
     @DeleteMapping("/{post_id}")
     public ApiResponse<String> deletePost(@PathVariable("post_id") Long post_id,
-//                                          @RequestBody PostRequestDTO.DeleteDTO request,
                                           HttpServletRequest httpServletRequest){
         Boolean isSuccess = postCommandService.deletePost(post_id, httpServletRequest);
         if(isSuccess){
@@ -198,7 +198,6 @@ public class PostRestController {
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.createComment(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_CREATED, PostCommentConverter.toCreateResultDTO(postComment));
-//        return null;
     }
 
     @Operation(summary = "댓글 수정 API",description = "유저가 작성한 댓글을 수정하는 API입니다")
@@ -216,7 +215,6 @@ public class PostRestController {
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.updateComment(post_id, comment_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_UPDATED, PostCommentConverter.toUpdateResultDTO(postComment));
-//        return null;
     }
 
     @Operation(summary = "댓글 삭제 API",description = "유저가 댓글을 삭제하는 API입니다")
@@ -252,7 +250,20 @@ public class PostRestController {
                                                                              HttpServletRequest httpServletRequest){
         PostCommentLike postCommentLike = postCommentCommandService.likeComment(post_id, comment_id, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_LIKE_SUCCESS, PostCommentConverter.toLikeResultDTO(postCommentLike));
-//        return null;
+    }
+
+    @Operation(summary = "게시글 세부사항 조회 API",description = "게시글 클릭시 상세정보를 보여주는 API입니다")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2009",description = "OK, 성공"),
+    })
+    @Parameters({
+            @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다"),
+    })
+    @PostMapping("/detail/{post_id}")
+    public ApiResponse<PostResponseDTO.PostDetailResultDTO> PostDetail(@PathVariable("post_id") Long post_id,
+                                                               HttpServletRequest httpServletRequest){
+        PostResponseDTO.PostDetailResultDTO postDetail = postCommandService.getPostDetail(post_id, httpServletRequest);
+        return ApiResponse.of(SuccessStatus.POST_DETAIL_SUCCESS, postDetail);
     }
 
 }
