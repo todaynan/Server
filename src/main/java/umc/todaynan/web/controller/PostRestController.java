@@ -259,7 +259,7 @@ public class PostRestController {
     @Parameters({
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다"),
     })
-    @GetMapping("/detail/{post_id}")
+    @PostMapping("/detail/{post_id}")
     public ApiResponse<PostResponseDTO.PostDetailResultDTO> PostDetail(@PathVariable("post_id") Long post_id,
                                                                HttpServletRequest httpServletRequest){
         PostResponseDTO.PostDetailResultDTO postDetail = postCommandService.getPostDetail(post_id, httpServletRequest);
