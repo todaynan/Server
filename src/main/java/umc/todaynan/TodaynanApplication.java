@@ -13,5 +13,5 @@ public class TodaynanApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TodaynanApplication.class, args);
 	}
-	//수정수정a
+	//ㅁ
 }
