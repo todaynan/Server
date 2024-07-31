@@ -13,5 +13,4 @@ public class TodaynanApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TodaynanApplication.class, args);
 	}
-	//ㅁ
 }
