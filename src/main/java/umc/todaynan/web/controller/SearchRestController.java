@@ -47,7 +47,7 @@ public class SearchRestController {
     @GetMapping("/search/outside")
     public ApiResponse<SearchPlaceDTO.GooglePlaceResponseDTO> getSearchLocation(
             @RequestParam(name = "searchString") String searchString,
-            @RequestParam(name = "pageToken") String pageToken) throws IOException {
+            @RequestParam(name = "pageToken", required = false) String pageToken) throws IOException {
         return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken));
     }
 
