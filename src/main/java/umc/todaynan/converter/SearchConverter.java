@@ -69,7 +69,7 @@ public class SearchConverter {
                     result.get("photos").get(0).get("name") != null ?
                     result.get("photos").get(0).get("name").asText() : "";
 
-            JsonNode viewportNode = responseJson.get("viewport");
+            JsonNode viewportNode = result.get("viewport");
             JsonNode northeastNode = viewportNode.get("low");
             JsonNode southwestNode = viewportNode.get("high");
 
