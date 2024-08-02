@@ -21,11 +21,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class GoogleSearchService {
-    private static final String URL = "https://maps.googleapis.com/maps/api/place/textsearch/json";
+    private static final String URL = "https://places.googleapis.com/v1/places:searchText";
     private static final String IMAGE_URL = "https://maps.googleapis.com/maps/api/place/photo";
 
     @Value("${GOOGLE_PLACE_KEY}")
     private String apiKey;
+    private URI uri;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final SearchConverter searchConverter;
@@ -35,19 +36,33 @@ public class GoogleSearchService {
         this.searchConverter = searchConverter;
     }
 
-    public List<SearchPlaceDTO.GooglePlaceResultDTO> searchPlaces(String searchString) throws IOException {
-        URI url = UriComponentsBuilder.fromHttpUrl(URL)
-                .queryParam("query", searchString)
-                .queryParam("key", apiKey)
-                .queryParam("language", "ko")
-                .encode(StandardCharsets.UTF_8)
-                .build()
-                .toUri();
+    public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken) throws IOException {
+        if (pageToken == null) {
+            uri = UriComponentsBuilder.fromHttpUrl(URL)
+                    .queryParam("pageSize", 5)
+                    .queryParam("languageCode", "ko")
+                    .encode(StandardCharsets.UTF_8)
+                    .build()
+                    .toUri();
+        }else {
+            uri = UriComponentsBuilder.fromHttpUrl(URL)
+                    .queryParam("pageToken", pageToken)
+                    .queryParam("pageSize", 5)
+                    .queryParam("languageCode", "ko")
+                    .encode(StandardCharsets.UTF_8)
+                    .build()
+                    .toUri();
+        }
 
-        RequestEntity<Void> req = RequestEntity
-                .get(url)
+        String body = "{ \"textQuery\": \"" + searchString + "\" }";
+
+
+        RequestEntity<String> req = RequestEntity
+                .post(uri)
                 .header("Content-Type", "application/json; charset=UTF-8")
-                .build();
+                .header("X-Goog-Api-Key", apiKey)
+                .header("X-Goog-FieldMask", "places.displayName,places.formattedAddress,places.viewport,places.photos,places.types,nextPageToken")
+                .body(body);
 
         ResponseEntity<String> response = restTemplate.exchange(req, String.class);
         JsonNode responseJson = objectMapper.readTree(response.getBody());
@@ -55,13 +70,17 @@ public class GoogleSearchService {
         List<SearchPlaceDTO.GooglePlaceResultDTO> googlePlaceResultDTOList = searchConverter.toGooglePlaceResponseDTO(responseJson);
         googlePlaceResultDTOList = addPhothUrl(googlePlaceResultDTOList);
 
-        return googlePlaceResultDTOList;
+        return SearchPlaceDTO.GooglePlaceResponseDTO.builder()
+                .googlePlaceResultDTOList(googlePlaceResultDTOList)
+                .pageToken(responseJson.get("nextPageToken").asText())
+                .build();
     }
 
     public List<SearchPlaceDTO.GooglePlaceResultDTO> addPhothUrl(List<SearchPlaceDTO.GooglePlaceResultDTO> googlePlaceResultDTOList) {
         List<SearchPlaceDTO.GooglePlaceResultDTO> googlePlaceResultList = googlePlaceResultDTOList.stream().map( googlePlaceResult -> {
+            String[] part = googlePlaceResult.getPhotoUrl().split("/");
             String photoUrl = String.format(IMAGE_URL+ "?maxwidth=400&photoreference=%s&key=%s",
-                    googlePlaceResult.getPhotoUrl(),
+                    part[part.length - 1],
                     apiKey);
 
             googlePlaceResult.setPhotoUrl(photoUrl);

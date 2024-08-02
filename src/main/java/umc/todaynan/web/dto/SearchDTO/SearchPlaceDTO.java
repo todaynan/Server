@@ -4,12 +4,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 public class SearchPlaceDTO {
+
+    @Builder
+    @Getter
+    @Setter
+    public static class GooglePlaceResponseDTO {
+        private List<GooglePlaceResultDTO> googlePlaceResultDTOList;
+        private String pageToken;
+    }
     @Builder
     @Getter
     @Setter
     public static class GooglePlaceResultDTO {
-        private String placeId;
         private GooglePlaceGeometryDTO geometry;
         private String name;
         private String address;
@@ -20,15 +29,14 @@ public class SearchPlaceDTO {
     @Getter
     @Setter
     public static class GooglePlaceGeometryDTO {
-        private GooglePlaceGeometryInfoDTO location;
         private GooglePlaceGeometryViewportDTO viewport;
     }
     @Builder
     @Getter
     @Setter
     public static class GooglePlaceGeometryViewportDTO {
-        private GooglePlaceGeometryInfoDTO northeast;
-        private GooglePlaceGeometryInfoDTO southwest;
+        private GooglePlaceGeometryInfoDTO low;
+        private GooglePlaceGeometryInfoDTO high;
     }
     @Builder
     @Getter

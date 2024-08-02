@@ -44,10 +44,11 @@ public class SearchRestController {
      * No Authorization
      */
     @Operation(summary = "밖 놀거리 검색 API",description = "No Authorization")
-    @GetMapping("/search/outside/{searchString}")
-    public ApiResponse<List<SearchPlaceDTO.GooglePlaceResultDTO>> getSearchLocation(
-            @PathVariable(name = "searchString") String searchString) throws IOException {
-        return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString));
+    @GetMapping("/search/outside")
+    public ApiResponse<SearchPlaceDTO.GooglePlaceResponseDTO> getSearchLocation(
+            @RequestParam(name = "searchString") String searchString,
+            @RequestParam(name = "pageToken") String pageToken) throws IOException {
+        return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken));
     }
 
     /**
