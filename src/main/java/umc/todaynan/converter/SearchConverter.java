@@ -61,49 +61,39 @@ public class SearchConverter {
 
     public List<SearchPlaceDTO.GooglePlaceResultDTO> toGooglePlaceResponseDTO(JsonNode responseJson) {
         List<SearchPlaceDTO.GooglePlaceResultDTO> places = new ArrayList<>();
-        for (JsonNode result : responseJson.get("results")) {
-            String placeId = result.get("place_id").asText();
-            String name = result.get("name").asText();
-            String address = result.get("formatted_address").asText();
+        for (JsonNode result : responseJson.get("places")) {
+            String name = result.get("displayName").get("text").asText();
+            String address = result.get("formattedAddress").asText();
             String type = result.get("types").get(0).asText();
             String photoUrl = result.get("photos") != null && result.get("photos").size() > 0 &&
-                    result.get("photos").get(0).get("photo_reference") != null ?
-                    result.get("photos").get(0).get("photo_reference").asText() : "";
+                    result.get("photos").get(0).get("name") != null ?
+                    result.get("photos").get(0).get("name").asText() : "";
 
-            JsonNode geometryNode = result.get("geometry");
-            JsonNode locationNode = geometryNode.get("location");
-            SearchPlaceDTO.GooglePlaceGeometryInfoDTO googlePlaceLocationDTO
-                    = SearchPlaceDTO.GooglePlaceGeometryInfoDTO.builder()
-                    .lat(locationNode.get("lat").asDouble())
-                    .lng(locationNode.get("lng").asDouble())
-                    .build();
-
-            JsonNode viewportNode = geometryNode.get("viewport");
-            JsonNode northeastNode = viewportNode.get("northeast");
-            JsonNode southwestNode = viewportNode.get("southwest");
+            JsonNode viewportNode = responseJson.get("viewport");
+            JsonNode northeastNode = viewportNode.get("low");
+            JsonNode southwestNode = viewportNode.get("high");
 
             SearchPlaceDTO.GooglePlaceGeometryInfoDTO googlePlaceNorthDTO
                     = SearchPlaceDTO.GooglePlaceGeometryInfoDTO.builder()
-                    .lat(northeastNode.get("lat").asDouble())
-                    .lng(northeastNode.get("lng").asDouble())
+                    .lat(northeastNode.get("latitude").asDouble())
+                    .lng(northeastNode.get("longitude").asDouble())
                     .build();
 
             SearchPlaceDTO.GooglePlaceGeometryInfoDTO googlePlaceSouthDTO
                     = SearchPlaceDTO.GooglePlaceGeometryInfoDTO.builder()
-                    .lat(southwestNode.get("lat").asDouble())
-                    .lng(southwestNode.get("lng").asDouble())
+                    .lat(southwestNode.get("latitude").asDouble())
+                    .lng(southwestNode.get("longitude").asDouble())
                     .build();
 
             SearchPlaceDTO.GooglePlaceGeometryViewportDTO googlePlaceGeometryViewportDTO
                     = SearchPlaceDTO.GooglePlaceGeometryViewportDTO.builder()
-                    .northeast(googlePlaceNorthDTO)
-                    .southwest(googlePlaceSouthDTO)
+                    .low(googlePlaceNorthDTO)
+                    .high(googlePlaceSouthDTO)
                     .build();
 
 
             SearchPlaceDTO.GooglePlaceGeometryDTO googlePlaceGeometryDTO
                     = SearchPlaceDTO.GooglePlaceGeometryDTO.builder()
-                    .location(googlePlaceLocationDTO)
                     .viewport(googlePlaceGeometryViewportDTO)
                     .build();
 
@@ -112,7 +102,6 @@ public class SearchConverter {
                     = SearchPlaceDTO.GooglePlaceResultDTO.builder()
                     .name(name)
                     .photoUrl(photoUrl)
-                    .placeId(placeId)
                     .geometry(googlePlaceGeometryDTO)
                     .type(type)
                     .address(address)
