@@ -25,6 +25,7 @@ public class SearchGeminiDTO {
         private String description;
         private String category;
         private String image;
+        private Boolean isLike;
     }
     @Builder
     @Getter

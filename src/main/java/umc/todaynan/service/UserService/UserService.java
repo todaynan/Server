@@ -35,7 +35,7 @@ public interface UserService {
     /**
      * User 정보를 기반으로 User Prefer 목록 가져오는 Service
      */
-    List<String> getPreferCategoryItems(HttpServletRequest httpServletRequest);
+    List<String> getPreferCategoryItems(User user);
 
     void changeNickNameByUserId(long userId, UserRequestDTO.UserGeneralRequestDTO newNickname);
     void changeMyAddress(long userId, UserRequestDTO.UserGeneralRequestDTO newAddress);

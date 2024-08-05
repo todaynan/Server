@@ -166,24 +166,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<String> getPreferCategoryItems(HttpServletRequest httpServletRequest) {
-        String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
+    public List<String> getPreferCategoryItems(User user) {
+        List<UserPrefer> userLikeListResultList = userPreferRepository.findAllByUser(user);
+        logger.debug("userLikeListResultList : {}", userLikeListResultList);
 
-        if(userRepository.existsByEmail(email)) { //이미 존재
-            Optional<User> user = userRepository.findByEmail(email);
-            List<UserPrefer> userLikeListResultList = userPreferRepository.findAllByUser(user.get());
+        List<String> userPreferTitleList = preferCategoryRepository.findTitlesByUserPrefer(userLikeListResultList);
+        logger.debug("userPreferTitleList : {}", userPreferTitleList);
 
-            logger.debug("userLikeListResultList : {}", userLikeListResultList);
-
-            List<String> userPreferTitleList = preferCategoryRepository.findTitlesByUserPrefer(userLikeListResultList);
-
-            logger.debug("userPreferTitleList : {}", userPreferTitleList);
-
-            return userPreferTitleList;
-        }
-        else{   //존재 X
-            return null;
-        }
+        return userPreferTitleList;
     }
 
     @Transactional
