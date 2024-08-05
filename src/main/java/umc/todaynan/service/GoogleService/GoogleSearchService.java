@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import umc.todaynan.converter.SearchConverter;
+import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.web.dto.SearchDTO.SearchPlaceDTO;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class GoogleSearchService {
         this.searchConverter = searchConverter;
     }
 
-    public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken, String address) throws IOException {
+    public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken, User user) throws IOException {
         if (pageToken == null) {
             uri = UriComponentsBuilder.fromHttpUrl(URL)
                     .queryParam("pageSize", 5)
@@ -53,7 +54,7 @@ public class GoogleSearchService {
                     .build()
                     .toUri();
         }
-        String[] addressPart = address.split(" ");
+        String[] addressPart = user.getAddress().split(" ");
         String body = "{ \"textQuery\": \"" + addressPart[addressPart.length-1] + " " + searchString + "\" }";
 
 
@@ -67,7 +68,7 @@ public class GoogleSearchService {
         ResponseEntity<String> response = restTemplate.exchange(req, String.class);
         JsonNode responseJson = objectMapper.readTree(response.getBody());
 
-        List<SearchPlaceDTO.GooglePlaceResultDTO> googlePlaceResultDTOList = searchConverter.toGooglePlaceResponseDTO(responseJson);
+        List<SearchPlaceDTO.GooglePlaceResultDTO> googlePlaceResultDTOList = searchConverter.toGooglePlaceResponseDTO(responseJson, user);
         googlePlaceResultDTOList = addPhothUrl(googlePlaceResultDTOList);
 
         return SearchPlaceDTO.GooglePlaceResponseDTO.builder()

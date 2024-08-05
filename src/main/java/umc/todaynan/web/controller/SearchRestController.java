@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import umc.todaynan.apiPayload.ApiResponse;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
@@ -63,7 +64,7 @@ public class SearchRestController {
         if (user.isEmpty()) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
         }else {
-            return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken, user.get().getAddress()));
+            return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken, user.get()));
         }
     }
 
@@ -73,7 +74,13 @@ public class SearchRestController {
     @Operation(summary = "안 놀거리 검색 API",description = "User Jwt Authorization")
     @GetMapping("/search/inside")
     public ApiResponse<SearchGeminiDTO.GeminiResponseDTO> getSearchInside(HttpServletRequest httpServletRequest) throws JsonProcessingException {
-        List<String> userPreferTitleList = userService.getPreferCategoryItems(httpServletRequest);
+        String givenToken = tokenService.getJwtFromHeader(httpServletRequest);
+        String email = tokenService.getUid(givenToken);
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if(user.isEmpty())  return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
+        List<String> userPreferTitleList = userService.getPreferCategoryItems(user.get());
 
         if (userPreferTitleList == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
@@ -96,7 +103,7 @@ public class SearchRestController {
                             }
                         }).collect(Collectors.toList());
 
-                return ApiResponse.of(SuccessStatus.USER_SEARCH_SUCCESS, naverConverter.toGeminiSearchDTO(geminiResponseDTO, naverImageItemsList));
+                return ApiResponse.of(SuccessStatus.USER_SEARCH_SUCCESS, naverConverter.toGeminiSearchDTO(geminiResponseDTO, naverImageItemsList, user.get()));
             }else {
                 return ApiResponse.onFailure(ErrorStatus.SEARCH_ERROR.getCode(), ErrorStatus.SEARCH_ERROR.getMessage(), null);
             }
