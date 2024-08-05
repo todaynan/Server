@@ -52,7 +52,7 @@ public class UserRestController {
     @PostMapping("/signup")
     public ApiResponse<UserResponseDTO.JoinResponseDTO> signUpUser(
             @RequestHeader("accessToken") String accessToken,
-            @RequestParam("Login Type") LoginType loginType,
+            @RequestParam("loginType") LoginType loginType,
             @RequestBody UserRequestDTO.JoinUserRequestDTO joinUserDTO) {
 
         switch (loginType) {
@@ -127,8 +127,8 @@ public class UserRestController {
 
     @Operation(summary = "로그인 API",description = "Social Access Token Authorization")
     @GetMapping("/login/")
-    public ApiResponse<UserResponseDTO.LoginResponseDTO> loginUser(@RequestParam("Access Token") String accessToken,
-                                                             @RequestParam("Login Type") LoginType loginType) {
+    public ApiResponse<UserResponseDTO.LoginResponseDTO> loginUser(@RequestParam("accessToken") String accessToken,
+                                                             @RequestParam("loginType") LoginType loginType) {
         switch (loginType) {
             case GOOGLE -> {
                 Optional<TokenInfoDTO.GoogleTokenInfoDTO> googleTokenInfo = googleTokenService.verifyAccessToken(accessToken);
