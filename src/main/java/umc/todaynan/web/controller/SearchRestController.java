@@ -10,7 +10,10 @@ import umc.todaynan.apiPayload.code.status.ErrorStatus;
 import umc.todaynan.apiPayload.code.status.SuccessStatus;
 import umc.todaynan.converter.SearchConverter;
 import umc.todaynan.converter.UserConverter;
+import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.domain.entity.User.UserLike.UserLike;
+import umc.todaynan.oauth2.TokenService;
+import umc.todaynan.repository.UserRepository;
 import umc.todaynan.service.GoogleService.GoogleGeminiService;
 import umc.todaynan.service.GoogleService.GoogleSearchService;
 import umc.todaynan.web.dto.SearchDTO.SearchPlaceDTO;
@@ -35,9 +38,12 @@ public class SearchRestController {
     private final SearchConverter naverConverter;
     private final UserService userService;
     private final GoogleSearchService googleSearchService;
+    private final TokenService tokenService;
 
     private final UserConverter userConverter;
     private final SearchConverter searchConverter;
+
+    private final UserRepository userRepository;
 
     /**
      * 장소 검색 API
@@ -46,9 +52,19 @@ public class SearchRestController {
     @Operation(summary = "밖 놀거리 검색 API",description = "No Authorization")
     @GetMapping("/search/outside")
     public ApiResponse<SearchPlaceDTO.GooglePlaceResponseDTO> getSearchLocation(
+            HttpServletRequest httpServletRequest,
             @RequestParam(name = "searchString") String searchString,
             @RequestParam(name = "pageToken", required = false) String pageToken) throws IOException {
-        return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken));
+        String givenToken = tokenService.getJwtFromHeader(httpServletRequest);
+        String email = tokenService.getUid(givenToken);
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
+        }else {
+            return ApiResponse.onSuccess(googleSearchService.searchPlaces(searchString, pageToken, user.get().getAddress()));
+        }
     }
 
     /**
