@@ -36,7 +36,7 @@ public class GoogleSearchService {
         this.searchConverter = searchConverter;
     }
 
-    public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken) throws IOException {
+    public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken, String address) throws IOException {
         if (pageToken == null) {
             uri = UriComponentsBuilder.fromHttpUrl(URL)
                     .queryParam("pageSize", 5)
@@ -53,8 +53,8 @@ public class GoogleSearchService {
                     .build()
                     .toUri();
         }
-
-        String body = "{ \"textQuery\": \"" + searchString + "\" }";
+        String[] addressPart = address.split(" ");
+        String body = "{ \"textQuery\": \"" + addressPart[addressPart.length-1] + " " + searchString + "\" }";
 
 
         RequestEntity<String> req = RequestEntity
