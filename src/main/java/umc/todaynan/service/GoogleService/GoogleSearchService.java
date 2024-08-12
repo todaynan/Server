@@ -48,7 +48,7 @@ public class GoogleSearchService {
         }else {
             uri = UriComponentsBuilder.fromHttpUrl(URL)
                     .queryParam("pageToken", pageToken)
-                    .queryParam("pageSize", 5)
+                    .queryParam("pageSize", 15)
                     .queryParam("languageCode", "ko")
                     .encode(StandardCharsets.UTF_8)
                     .build()
