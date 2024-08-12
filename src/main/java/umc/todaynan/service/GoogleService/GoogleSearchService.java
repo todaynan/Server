@@ -40,7 +40,7 @@ public class GoogleSearchService {
     public SearchPlaceDTO.GooglePlaceResponseDTO searchPlaces(String searchString, String pageToken, User user) throws IOException {
         if (pageToken == null) {
             uri = UriComponentsBuilder.fromHttpUrl(URL)
-                    .queryParam("pageSize", 5)
+                    .queryParam("pageSize", 15)
                     .queryParam("languageCode", "ko")
                     .encode(StandardCharsets.UTF_8)
                     .build()
