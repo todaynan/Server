@@ -225,7 +225,7 @@ public class PostRestController {
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다"),
             @Parameter(name = "comment_id", description = "댓글의 id, path variable 입니다")
     })
-    @PostMapping("/comment/{post_id}/{comment_id}")
+    @DeleteMapping("/comment/{post_id}/{comment_id}")
     public ApiResponse<String> deletePostComment(@PathVariable("post_id") Long post_id,
                                                  @PathVariable("comment_id") Long comment_id,
                                                  HttpServletRequest httpServletRequest){
@@ -244,7 +244,7 @@ public class PostRestController {
             @Parameter(name = "post_id", description = "게시글의 id, path variable 입니다"),
             @Parameter(name = "comment_id", description = "댓글의 id, path variable 입니다")
     })
-    @DeleteMapping("/comment/like/{post_id}/{comment_id}")
+    @PostMapping("/comment/like/{post_id}/{comment_id}")
     public ApiResponse<PostResponseDTO.LikePostCommentResultDTO> likePostComment(@PathVariable("post_id") Long post_id,
                                                                              @PathVariable("comment_id") Long comment_id,
                                                                              HttpServletRequest httpServletRequest){
