@@ -15,6 +15,7 @@ import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.domain.entity.User.User.User;
+import umc.todaynan.domain.enums.MyPet;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.repository.*;
 import umc.todaynan.service.PostCommentService.PostCommentCommandService;
@@ -121,6 +122,7 @@ public class PostCommandService implements PostCommandServiceImpl{
                 .map(postComment -> new PostCommentListDTO(
                         postComment.getId(),
                         postComment.getUser().getNickName(),
+                        postComment.getUser().getMyPet(),
                         postComment.getComment(),
                         postComment.getPostCommentLikeList().size()
                 ))
@@ -153,6 +155,7 @@ public class PostCommandService implements PostCommandServiceImpl{
         return PostResponseDTO.PostDetailResultDTO.builder()
                 .post_id(post.getId())
                 .nick_name(post.getUser().getNickName())
+                .myPet(post.getUser().getMyPet())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .post_like_cnt(post_cnt)
@@ -167,6 +170,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     public static class PostCommentListDTO{
         private Long post_comment_id;
         private String nick_name;
+        private MyPet myPet;
         private String content;
         private Integer post_comment_like_cnt;
     }
