@@ -7,6 +7,7 @@ import umc.todaynan.domain.entity.Post.PostLike.PostLike;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,15 +33,19 @@ public class PostConverter {
     }
 
     public static PostResponseDTO.PostDTO toPostDTO(Post post) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm");
+        String formattedCreatedAt = post.getCreatedAt().format(formatter);
+
         return PostResponseDTO.PostDTO.builder()
                 .postId(post.getId())
                 .userId(post.getUser().getId())
                 .userNickname(post.getUser().getNickName())
                 .userAddress(post.getUser().getAddress())
                 .postTitle(post.getTitle())
+                .postContent(post.getContent())
                 .postLike(post.getPostLikeList().size())
                 .postComment(post.getPostCommentList().size())
-                .createdAt(post.getCreatedAt())
+                .createdAt(formattedCreatedAt)
                 .build();
     }
 

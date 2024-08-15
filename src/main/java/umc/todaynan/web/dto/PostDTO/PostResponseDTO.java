@@ -71,7 +71,7 @@ public class PostResponseDTO {
         String postContent;
         Integer postLike;
         Integer postComment;
-        LocalDateTime createdAt;
+        String createdAt;
     }
 
     @Builder
