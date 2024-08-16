@@ -22,6 +22,7 @@ import umc.todaynan.service.PostCommentService.PostCommentCommandService;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -124,7 +125,8 @@ public class PostCommandService implements PostCommandServiceImpl{
                         postComment.getUser().getNickName(),
                         postComment.getUser().getMyPet(),
                         postComment.getComment(),
-                        postComment.getPostCommentLikeList().size()
+                        postComment.getPostCommentLikeList().size(),
+                        postComment.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
 
@@ -159,6 +161,7 @@ public class PostCommandService implements PostCommandServiceImpl{
                 .title(post.getTitle())
                 .content(post.getContent())
                 .post_like_cnt(post_cnt)
+                .createdAt(post.getCreatedAt())
                 .postCommentList(post_comments)
                 .build();
     }
@@ -173,5 +176,6 @@ public class PostCommandService implements PostCommandServiceImpl{
         private MyPet myPet;
         private String content;
         private Integer post_comment_like_cnt;
+        private LocalDateTime createdAt;
     }
 }

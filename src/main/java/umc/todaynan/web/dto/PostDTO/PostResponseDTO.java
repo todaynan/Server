@@ -95,6 +95,7 @@ public class PostResponseDTO {
         private String title;
         private String content;
         private Long post_like_cnt;
+        private LocalDateTime createdAt;
         private List<PostCommandService.PostCommentListDTO> postCommentList;
 
     }
