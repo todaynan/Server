@@ -1,9 +1,6 @@
 package umc.todaynan.web.dto.PostDTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.Post.PostComment.PostComment;
 import umc.todaynan.domain.enums.MyPet;
@@ -86,6 +83,7 @@ public class PostResponseDTO {
 
     @Builder
     @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostDetailResultDTO {
@@ -95,7 +93,7 @@ public class PostResponseDTO {
         private String title;
         private String content;
         private Long post_like_cnt;
-        private LocalDateTime createdAt;
+        private String createdAt;
         private List<PostCommandService.PostCommentListDTO> postCommentList;
 
     }
