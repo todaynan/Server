@@ -15,4 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByCategoryOrderByCreatedAtDesc(PostCategory category, PageRequest pageRequest);
     Page<Post> findAllByCategoryAndUser_AddressContainingOrderByCreatedAtDesc(PostCategory category, String address, PageRequest pageRequest);
     Page<Post> findAllByOrderByPostLikeListDesc(PageRequest pageRequest);
+    Page<Post> findByUserId(long userId, PageRequest pageRequest);
 }
