@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
@@ -14,6 +16,7 @@ import umc.todaynan.apiPayload.exception.handler.PreferCategoryHandler;
 import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.UserConverter;
 import umc.todaynan.converter.UserPreferConverter;
+import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.domain.entity.User.UserLike.UserLike;
 import umc.todaynan.domain.entity.User.UserPrefer.PreferCategory;
@@ -22,18 +25,14 @@ import umc.todaynan.domain.enums.LoginType;
 import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.oauth2.user.ProviderUser;
-import umc.todaynan.repository.PreferCategoryRepository;
-import umc.todaynan.repository.UserLikeRepository;
-import umc.todaynan.repository.UserPreferRepository;
-import umc.todaynan.repository.UserRepository;
+import umc.todaynan.repository.*;
 import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +46,9 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserLikeRepository userLikeRepository;
     private final UserPreferRepository userPreferRepository;
+    private final PostCommentCommentRepository postCommentCommentRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostRepository postRepository;
 
     private final TokenService tokenService;
     private final UserConverter userConverter;
@@ -238,4 +240,18 @@ public class UserServiceImpl implements UserService{
         return user.getId();
     }
 
+
+    public Page<Post> getUserPostListByUserIdByUserIdAndComments(long userId, PageRequest pageRequest) {
+        List<Long> postIdsByUserIdOnCommentComment = postCommentCommentRepository.findPostIdsByUserId(userId);
+        List<Long> postIdsByUserIdOnComment = postCommentRepository.findPostIdsByUserId(userId);
+        Set<Long> merged = new HashSet<>(postIdsByUserIdOnCommentComment);
+        merged.addAll(postIdsByUserIdOnComment);
+        List<Post> posts = postRepository.findAllById(merged);
+        long total = posts.size();
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), posts.size());
+        List<Post> pagedPosts = posts.subList(start, end);
+
+        return new PageImpl<>(pagedPosts, pageRequest, total);
+    }
 }

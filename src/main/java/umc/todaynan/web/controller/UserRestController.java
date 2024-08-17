@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import umc.todaynan.apiPayload.ApiResponse;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
@@ -259,7 +260,7 @@ public class UserRestController {
         }
     }
 
-    @GetMapping("/postlist")
+    @GetMapping("/postlist/post")
     @Operation(summary = "유저가 쓴 게시글 가져오는 API", description = "헤더에 토큰 넣어야함. 토큰으로부터 로그인한 사람의 게시글 가져오는 API")
     public ApiResponse<PostResponseDTO.PostListDTO> myPostList(
             HttpServletRequest request,
@@ -272,10 +273,28 @@ public class UserRestController {
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isPresent()) {
-            Page<Post> userPage = postQueryService.getUserPostList(user.get().getId(), page - 1);
+            Page<Post> userPage = postQueryService.getUserPostListByUserId(user.get().getId(), page - 1);
             return ApiResponse.onSuccess(PostConverter.toPostListDTO(userPage));
         } else {
             return ApiResponse.onFailure(ErrorStatus.SEARCH_ERROR.getCode(), ErrorStatus.SEARCH_ERROR.getMessage(), null);
         }
+    }
+
+    @GetMapping("/postlist/comment")
+    @Operation(summary = "유저가 쓴 댓글 가져오는 API", description = "헤더에 토큰 넣어야함. 토큰으로부터 로그인한 사람의 댓글의 게시글 가져오는 API")
+    public ApiResponse<PostResponseDTO.PostListDTO> myCommentList(
+            HttpServletRequest request,
+            @Parameter(description = "페이지 번호(1부터 시작), default: 1 / size = 10")
+            @RequestParam(defaultValue = "1") Integer page) {
+        String givenToken = tokenService.getJwtFromHeader(request);
+        String email = tokenService.getUid(givenToken);
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isPresent()) {
+            Page<Post> userPage = userService.getUserPostListByUserIdByUserIdAndComments(user.get().getId(), PageRequest.of(page-1, 10));
+            return ApiResponse.onSuccess(PostConverter.toPostListDTO(userPage));
+        }
+        return ApiResponse.onFailure(ErrorStatus.SEARCH_ERROR.getCode(), ErrorStatus.SEARCH_ERROR.getMessage(), null);
     }
 }

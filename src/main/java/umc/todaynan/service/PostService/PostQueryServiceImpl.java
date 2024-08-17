@@ -50,7 +50,7 @@ public class PostQueryServiceImpl implements PostQueryService{
     }
 
     @Override
-    public Page<Post> getUserPostList(long userId, Integer page) {
-        return postRepository.findByUserId(userId, PageRequest.of(page, 10));
+    public Page<Post> getUserPostListByUserId(long userId, Integer page) {
+        return postRepository.findAllByUserId(userId, PageRequest.of(page, 10));
     }
 }
