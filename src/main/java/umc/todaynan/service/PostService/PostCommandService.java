@@ -48,7 +48,7 @@ public class PostCommandService implements PostCommandServiceImpl{
      * 게시글 생성 API
      * 1. User 확인
      * 2. Request to DTO
-     * 3. Post에 User 세팅
+     * 3. Post에 User 세팅4
      * 4. Post 저장
      * */
     @Transactional
