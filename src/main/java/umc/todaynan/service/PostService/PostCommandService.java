@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
+import umc.todaynan.apiPayload.exception.PostNotFoundException;
 import umc.todaynan.apiPayload.exception.handler.PostHandler;
-import umc.todaynan.apiPayload.exception.handler.PostLikeHandler;
 import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.PostConverter;
 import umc.todaynan.domain.entity.Post.Post.Post;
@@ -22,7 +22,7 @@ import umc.todaynan.service.PostCommentService.PostCommentCommandService;
 import umc.todaynan.web.dto.PostDTO.PostRequestDTO;
 import umc.todaynan.web.dto.PostDTO.PostResponseDTO;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -116,7 +116,8 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Override
     public PostResponseDTO.PostDetailResultDTO getPostDetail(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+//        Post post = findPost(post_id, user);
+        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostNotFoundException("post not found"));
         Long post_like_cnt = postLikeRepository.countByPostId(post_id);
         List<PostComment> postCommentList = postCommentCommandService.getPostCommentList(post_id, httpServletRequest);
         List<PostCommentListDTO> post_comments = postCommentList.stream()
@@ -126,11 +127,13 @@ public class PostCommandService implements PostCommandServiceImpl{
                         postComment.getUser().getMyPet(),
                         postComment.getComment(),
                         postComment.getPostCommentLikeList().size(),
-                        postComment.getCreatedAt()
+                        postComment.getCreatedAt().format(DateTimeFormatter.ofPattern("MM-dd HH:mm"))
                 ))
                 .collect(Collectors.toList());
 
-        return toPostDetailResultDTO(post, post_like_cnt, post_comments);
+        PostResponseDTO.PostDetailResultDTO postDetailResultDTO = toPostDetailResultDTO(post, post_like_cnt, post_comments);
+        postDetailResultDTO.setCreatedAt(post.getCreatedAt().format(DateTimeFormatter.ofPattern("MM-dd HH:mm")));
+        return postDetailResultDTO;
     }
 
     public User findUser(HttpServletRequest httpServletRequest){
@@ -161,7 +164,6 @@ public class PostCommandService implements PostCommandServiceImpl{
                 .title(post.getTitle())
                 .content(post.getContent())
                 .post_like_cnt(post_cnt)
-                .createdAt(post.getCreatedAt())
                 .postCommentList(post_comments)
                 .build();
     }
@@ -176,6 +178,6 @@ public class PostCommandService implements PostCommandServiceImpl{
         private MyPet myPet;
         private String content;
         private Integer post_comment_like_cnt;
-        private LocalDateTime createdAt;
+        private String createdAt;
     }
 }
