@@ -63,6 +63,7 @@ public class PostResponseDTO {
         Long postId;
         Long userId;
         String userNickname;
+        MyPet myPet;
         String userAddress;
         String postTitle;
         String postContent;

@@ -40,6 +40,7 @@ public class PostConverter {
                 .postId(post.getId())
                 .userId(post.getUser().getId())
                 .userNickname(post.getUser().getNickName())
+                .myPet(post.getUser().getMyPet())
                 .userAddress(post.getUser().getAddress())
                 .postTitle(post.getTitle())
                 .postContent(post.getContent())
