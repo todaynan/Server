@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
+import umc.todaynan.apiPayload.exception.PostNotFoundException;
 import umc.todaynan.apiPayload.exception.handler.PostCommentHandler;
 import umc.todaynan.apiPayload.exception.handler.PostCommentLikeHandler;
 import umc.todaynan.apiPayload.exception.handler.PostHandler;
@@ -51,8 +52,9 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostComment createComment(Long post_id, PostRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+//        Post post = findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
+        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostNotFoundException("post not found"));;
         postComment.setPost(post);
         postComment.setUser(user);
         return postCommentRepository.save(postComment);
@@ -97,14 +99,18 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostCommentLike likeComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+//        Post post = findPost(post_id, user);
         Optional<PostCommentLike> byUserIdAndPostCommentId = postCommentLikeRepository.findByUserIdAndPostCommentId(user.getId(), comment_id);
         if(!byUserIdAndPostCommentId.isPresent()) {
-            log.info("postcomment like not exist");
             PostComment postComment = postCommentRepository.findById(comment_id)
                     .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
-            PostCommentLike postCommentLike = toPostCommentLike(user, postComment);
-            return postCommentLikeRepository.save(postCommentLike);
+//            if(postComment.getUser().getId() == user.getId()) {
+//                throw new IllegalArgumentException("자신의 댓글엔 좋아요를 누를 수 없습니다");
+//            }
+//            else{
+                PostCommentLike postCommentLike = toPostCommentLike(user, postComment);
+                return postCommentLikeRepository.save(postCommentLike);
+//            }
         }
         return null;
     }
