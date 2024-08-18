@@ -97,7 +97,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Override
     public PostLike likePost(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+        Post post = postRepository.findPostById(post_id);
         Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
         if(!byUserAndPost.isPresent()){
             log.info("post like not exist");

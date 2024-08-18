@@ -70,7 +70,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostComment updateComment(Long post_id, Long comment_id, PostRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
         PostComment postComment = postCommentRepository.findById(comment_id)
                 .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
         postComment.setComment(request.getComment());
@@ -85,7 +84,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public Boolean deleteComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
         postCommentRepository.deleteById(comment_id);
         return true;
     }

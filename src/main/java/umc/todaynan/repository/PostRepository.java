@@ -19,4 +19,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByOrderByPostLikeListDesc(PageRequest pageRequest);
     Page<Post> findAllByUserId(long userId, PageRequest pageRequest);
     List<Post> findAllById(Iterable<Long> postId);
+
+    Post findPostById(Long id);
 }
