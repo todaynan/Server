@@ -1,6 +1,9 @@
 package umc.todaynan.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.domain.entity.User.UserLike.UserLike;
 import umc.todaynan.domain.enums.LoginType;
@@ -41,4 +44,5 @@ public interface UserService {
     void changeMyAddress(long userId, UserRequestDTO.UserGeneralRequestDTO newAddress);
     void userSignOut(long userId);
     long findUserIdByEmail(String email);
+    Page<Post> getUserPostListByUserIdByUserIdAndComments(long userId, PageRequest pageRequest);
 }
