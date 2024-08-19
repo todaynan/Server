@@ -18,6 +18,7 @@ import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.domain.enums.LoginType;
 import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
+import umc.todaynan.repository.UserLikeRepository;
 import umc.todaynan.repository.UserRepository;
 import umc.todaynan.service.PostService.PostQueryService;
 import umc.todaynan.service.TokenService.GoogleTokenService;
@@ -46,6 +47,7 @@ public class UserRestController {
     private final UserPreferCommandService userPreferCommandService;
     private final UserBlockingCommandService userBlockingCommandService;
     private final PostQueryService postQueryService;
+    private final UserLikeRepository userLikeRepository;
 
     private final UserRepository userRepository;
 
@@ -232,6 +234,7 @@ public class UserRestController {
 
         if (user.isPresent()) {
             log.info("[UserController - signOut] {}번 유저의 탈퇴입니다.", user.get().getId());
+            userLikeRepository.deleteByUserId(user.get().getId());
             userService.userSignOut(user.get().getId());
             UserResponseDTO.UserModifyDTO responseDto = new UserResponseDTO.UserModifyDTO();
             responseDto.setMessage("유저 탈퇴 완료");

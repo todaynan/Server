@@ -12,4 +12,6 @@ public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
     Integer deleteUserLikeByIdAndUser(Long likeId, User user);
 
     Boolean existsByTitleAndUserAndCategory(String title, User user, PlaceCategory placeCategory);
+
+    void deleteByUserId(Long userId);
 }
