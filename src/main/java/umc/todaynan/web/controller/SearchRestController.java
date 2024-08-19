@@ -26,6 +26,8 @@ import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -143,6 +145,12 @@ public class SearchRestController {
         if (userLikeListResultList == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_EXIST.getCode(), ErrorStatus.USER_NOT_EXIST.getMessage(), null);
         }else {
+            Collections.sort(userLikeListResultList.getUserLikeItems(), new Comparator<UserResponseDTO.UserLikeItems>() {
+                @Override
+                public int compare(UserResponseDTO.UserLikeItems o1, UserResponseDTO.UserLikeItems o2) {
+                    return o2.getCreated_at().compareTo(o1.getCreated_at());
+                }
+            });
             return ApiResponse.of(SuccessStatus.USER_LIKE_COLLECT_SUCCESS, userLikeListResultList);
         }
     }
