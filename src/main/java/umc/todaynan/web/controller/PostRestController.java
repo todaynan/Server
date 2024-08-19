@@ -125,7 +125,7 @@ public class PostRestController {
         Page<Post> hotPostPage = postQueryService.getHotPostList(page-1);
         return ApiResponse.onSuccess(PostConverter.toPostListDTO(hotPostPage));
     }
-
+    //
     @Operation(summary = "게시글 작성 API",description = "게시판에 유저가 게시글을 작성하는 API입니다")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "POST2005",description = "OK, 성공"),

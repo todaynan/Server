@@ -70,7 +70,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostComment updateComment(Long post_id, Long comment_id, PostRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
         PostComment postComment = postCommentRepository.findById(comment_id)
                 .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
         postComment.setComment(request.getComment());
@@ -85,7 +84,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public Boolean deleteComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
         postCommentRepository.deleteById(comment_id);
         return true;
     }
@@ -104,17 +102,17 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
         if(!byUserIdAndPostCommentId.isPresent()) {
             PostComment postComment = postCommentRepository.findById(comment_id)
                     .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
-            if(postComment.getUser().getId() == user.getId()) {
-                throw new IllegalArgumentException("자신의 댓글엔 좋아요를 누를 수 없습니다");
-            }
-            else{
+//            if(postComment.getUser().getId() == user.getId()) {
+//                throw new IllegalArgumentException("자신의 댓글엔 좋아요를 누를 수 없습니다");
+//            }
+//            else{
                 PostCommentLike postCommentLike = toPostCommentLike(user, postComment);
                 return postCommentLikeRepository.save(postCommentLike);
-            }
+//            }
         }
         return null;
     }
-
+    //
     /*
     * 게시글 댓글 조회 API
     * 1. User 확인

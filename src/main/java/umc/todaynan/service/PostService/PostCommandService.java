@@ -48,7 +48,7 @@ public class PostCommandService implements PostCommandServiceImpl{
      * 게시글 생성 API
      * 1. User 확인
      * 2. Request to DTO
-     * 3. Post에 User 세팅
+     * 3. Post에 User 세팅4
      * 4. Post 저장
      * */
     @Transactional
@@ -97,7 +97,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Override
     public PostLike likePost(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+        Post post = postRepository.findPostById(post_id);
         Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
         if(!byUserAndPost.isPresent()){
             log.info("post like not exist");

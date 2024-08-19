@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import umc.todaynan.domain.entity.User.User.User;
+import umc.todaynan.domain.enums.PlaceCategory;
+import umc.todaynan.repository.UserLikeRepository;
 import umc.todaynan.web.dto.SearchDTO.SearchPlaceDTO;
 import umc.todaynan.web.controller.SearchRestController;
 import umc.todaynan.web.dto.SearchDTO.SearchGeminiDTO;
@@ -22,17 +25,18 @@ import java.util.stream.IntStream;
 public class SearchConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchRestController.class);
-
     private final ObjectMapper objectMapper;
+    private final UserLikeRepository userLikeRepository;
 
-    public SearchConverter(ObjectMapper objectMapper) {
+    public SearchConverter(ObjectMapper objectMapper, UserLikeRepository userLikeRepository) {
 
         this.objectMapper = objectMapper;
+        this.userLikeRepository = userLikeRepository;
     }
 
-    public  SearchGeminiDTO.GeminiResponseDTO toGeminiSearchDTO(SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO, List<SearchImageDTO.NaverImageItems> naverImageInfo) {
+    public  SearchGeminiDTO.GeminiResponseDTO toGeminiSearchDTO(SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO, List<SearchImageDTO.NaverImageItems> naverImageInfo, User user) {
         List<SearchGeminiDTO.GeminiResponseItemDTO> searchResultDTOList = IntStream.range(0, geminiResponseDTO.getGeminiResponseItemDTOList().size())
-                .mapToObj(i -> toGeminiSearchResponseDTO( geminiResponseDTO.getGeminiResponseItemDTOList().get(i),  naverImageInfo.get(i)))
+                .mapToObj(i -> toGeminiSearchResponseDTO( geminiResponseDTO.getGeminiResponseItemDTOList().get(i),  naverImageInfo.get(i), user))
                 .collect(Collectors.toList());
 
         logger.debug("searchResultDTOList : {}", searchResultDTOList);
@@ -42,12 +46,13 @@ public class SearchConverter {
                 .build();
     }
 
-    public  SearchGeminiDTO.GeminiResponseItemDTO toGeminiSearchResponseDTO(SearchGeminiDTO.GeminiResponseItemDTO geminiResponseItem, SearchImageDTO.NaverImageItems naverImageItem) {
+    public  SearchGeminiDTO.GeminiResponseItemDTO toGeminiSearchResponseDTO(SearchGeminiDTO.GeminiResponseItemDTO geminiResponseItem, SearchImageDTO.NaverImageItems naverImageItem, User user) {
         return SearchGeminiDTO.GeminiResponseItemDTO.builder()
                 .title(geminiResponseItem.getTitle())
                 .description(geminiResponseItem.getDescription())
                 .image(naverImageItem.getThumbnail())
                 .category(geminiResponseItem.getCategory())
+                .isLike(userLikeRepository.existsByTitleAndUserAndCategory(geminiResponseItem.getTitle(), user, PlaceCategory.IN))
                 .build();
     }
 
@@ -59,7 +64,7 @@ public class SearchConverter {
         return SearchGeminiDTO.GeminiResponseDTO.builder().geminiResponseItemDTOList(geminiResponseItemDTOList).build();
     }
 
-    public List<SearchPlaceDTO.GooglePlaceResultDTO> toGooglePlaceResponseDTO(JsonNode responseJson) {
+    public List<SearchPlaceDTO.GooglePlaceResultDTO> toGooglePlaceResponseDTO(JsonNode responseJson, User user) {
         List<SearchPlaceDTO.GooglePlaceResultDTO> places = new ArrayList<>();
         for (JsonNode result : responseJson.get("places")) {
             String name = result.get("displayName").get("text").asText();
@@ -98,6 +103,8 @@ public class SearchConverter {
                     .build();
 
 
+
+
             SearchPlaceDTO.GooglePlaceResultDTO googlePlaceResultDTO
                     = SearchPlaceDTO.GooglePlaceResultDTO.builder()
                     .name(name)
@@ -105,6 +112,7 @@ public class SearchConverter {
                     .geometry(googlePlaceGeometryDTO)
                     .type(type)
                     .address(address)
+                    .isLike(userLikeRepository.existsByTitleAndUserAndCategory(name, user, PlaceCategory.OUT))
                     .build();
 
             places.add(googlePlaceResultDTO);

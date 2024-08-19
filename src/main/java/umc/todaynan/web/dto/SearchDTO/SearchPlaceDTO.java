@@ -24,6 +24,7 @@ public class SearchPlaceDTO {
         private String address;
         private String photoUrl;
         private String type;
+        private Boolean isLike;
     }
     @Builder
     @Getter
