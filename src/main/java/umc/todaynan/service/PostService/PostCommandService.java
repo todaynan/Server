@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
-import umc.todaynan.apiPayload.exception.PostNotFoundException;
 import umc.todaynan.apiPayload.exception.handler.PostHandler;
 import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.PostConverter;
@@ -83,7 +82,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Override
     public Boolean deletePost(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
-        Post post = findPost(post_id, user);
+        findPost(post_id, user);
         postRepository.deleteById(post_id); // post 삭제
         return true;
     }
@@ -97,7 +96,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     @Override
     public PostLike likePost(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
-        Post post = postRepository.findPostById(post_id);
+        Post post = postRepository.findPostById(post_id).orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
         if(byUserAndPost.isPresent()){
             throw new UserHandler(ErrorStatus.POST_LIKE_EXIST);
@@ -114,8 +113,7 @@ public class PostCommandService implements PostCommandServiceImpl{
      * */
     @Override
     public PostResponseDTO.PostDetailResultDTO getPostDetail(Long post_id, HttpServletRequest httpServletRequest){
-        User user = findUser(httpServletRequest);
-//        Post post = findPost(post_id, user);
+        findUser(httpServletRequest);
         Post post = postRepository.findById(post_id).orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         Long post_like_cnt = postLikeRepository.countByPostId(post_id);
         List<PostComment> postCommentList = postCommentCommandService.getPostCommentList(post_id, httpServletRequest);

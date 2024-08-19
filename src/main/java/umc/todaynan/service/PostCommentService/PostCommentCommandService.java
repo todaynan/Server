@@ -52,13 +52,11 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostComment createComment(Long post_id, PostRequestDTO.CreatePostCommentDTO request, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-//        Post post = findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
         Post post = postRepository.findById(post_id).orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         postComment.setPost(post);
         postComment.setUser(user);
         return postCommentRepository.save(postComment);
-//        return null;
     }
 
     /*
@@ -69,7 +67,8 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     * */
     @Override
     public PostComment updateComment(Long post_id, Long comment_id, PostRequestDTO.UpdatePostCommentDTO request, HttpServletRequest httpServletRequest) {
-        User user = findUser(httpServletRequest);
+        findUser(httpServletRequest);
+        postRepository.findById(post_id).orElseThrow(()-> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         PostComment postComment = postCommentRepository.findById(comment_id)
                 .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
         postComment.setComment(request.getComment());
@@ -83,7 +82,9 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
      * */
     @Override
     public Boolean deleteComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
-        User user = findUser(httpServletRequest);
+        findUser(httpServletRequest);
+        postRepository.findById(post_id).orElseThrow(()-> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+        postCommentRepository.findById(comment_id).orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
         postCommentRepository.deleteById(comment_id);
         return true;
     }
@@ -97,22 +98,19 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public PostCommentLike likeComment(Long post_id, Long comment_id, HttpServletRequest httpServletRequest) {
         User user = findUser(httpServletRequest);
-//        Post post = findPost(post_id, user);
-        Optional<PostCommentLike> byUserIdAndPostCommentId = postCommentLikeRepository.findByUserIdAndPostCommentId(user.getId(), comment_id);
-        if(!byUserIdAndPostCommentId.isPresent()) {
-            PostComment postComment = postCommentRepository.findById(comment_id)
-                    .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
-//            if(postComment.getUser().getId() == user.getId()) {
-//                throw new IllegalArgumentException("자신의 댓글엔 좋아요를 누를 수 없습니다");
-//            }
-//            else{
-                PostCommentLike postCommentLike = toPostCommentLike(user, postComment);
-                return postCommentLikeRepository.save(postCommentLike);
-//            }
+
+        postRepository.findById(post_id).orElseThrow(()-> new PostHandler(ErrorStatus.POST_NOT_EXIST));
+
+        PostComment postComment = postCommentRepository.findById(comment_id)
+                .orElseThrow(() -> new PostCommentHandler(ErrorStatus.POST_COMMENT_NOT_EXIST));
+
+        Optional<PostCommentLike> postCommentLike = postCommentLikeRepository.findByUserIdAndPostCommentId(user.getId(), comment_id);
+        if (postCommentLike.isPresent()) {
+            throw new PostCommentLikeHandler(ErrorStatus.POST_COMMENT_LIKE_EXIST);
         }
-        return null;
+        return postCommentLikeRepository.save(toPostCommentLike(user, postComment));
     }
-    //
+
     /*
     * 게시글 댓글 조회 API
     * 1. User 확인
@@ -121,7 +119,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
     @Override
     public List<PostComment> getPostCommentList(Long post_id, HttpServletRequest httpServletRequest){
         List<PostComment> byPostId = postCommentRepository.findByPostId(post_id);
-
         return byPostId;
     }
 
@@ -130,12 +127,6 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
         User user = userRepository.findByEmail(email) //헤더 정보에서 추출한 이메일로 체크
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_EXIST));
         return user;
-    }
-
-    public Post findPost(Long post_id, User user){
-        Post post = postRepository.findByIdAndUserId(post_id, user.getId())
-                .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
-        return post;
     }
 
     private PostCommentLike toPostCommentLike(User user, PostComment postComment) {
