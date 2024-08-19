@@ -53,39 +53,39 @@ public class User extends DateBaseEntity {
     @Column(nullable = false)
     private LoginType loginType;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPrefer> userPreferList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "blockingUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "blockingUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBlocking> userBlockingList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "blockedUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "blockedUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBlocking> userBlockedList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Chat> chatList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "sendUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sendUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRoomSendList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "receiveUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiveUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRoomReceiveList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikeList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostComment> postCommentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostCommentLike> postCommentLikeList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostCommentComment> postCommentCommentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostCommentCommentLike> postCommentCommentLikeList = new ArrayList<>();
 }
