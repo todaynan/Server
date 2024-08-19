@@ -54,7 +54,7 @@ public class PostCommentCommandService implements PostCommentCommandServiceImpl 
         User user = findUser(httpServletRequest);
 //        Post post = findPost(post_id, user);
         PostComment postComment = PostCommentConverter.toPostComment(request);
-        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostNotFoundException("post not found"));;
+        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         postComment.setPost(post);
         postComment.setUser(user);
         return postCommentRepository.save(postComment);

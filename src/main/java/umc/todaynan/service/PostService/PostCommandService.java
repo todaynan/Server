@@ -99,12 +99,11 @@ public class PostCommandService implements PostCommandServiceImpl{
         User user = findUser(httpServletRequest);
         Post post = postRepository.findPostById(post_id);
         Optional<PostLike> byUserAndPost = postLikeRepository.findByUserAndPost(user, post);
-        if(!byUserAndPost.isPresent()){
-            log.info("post like not exist");
-            PostLike postLike = toPostLike(user, post);
-            return postLikeRepository.save(postLike);
+        if(byUserAndPost.isPresent()){
+            throw new UserHandler(ErrorStatus.POST_LIKE_EXIST);
         }
-        return null;
+        PostLike postLike = toPostLike(user, post);
+        return postLikeRepository.save(postLike);
     }
 
     /*
@@ -117,7 +116,7 @@ public class PostCommandService implements PostCommandServiceImpl{
     public PostResponseDTO.PostDetailResultDTO getPostDetail(Long post_id, HttpServletRequest httpServletRequest){
         User user = findUser(httpServletRequest);
 //        Post post = findPost(post_id, user);
-        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostNotFoundException("post not found"));
+        Post post = postRepository.findById(post_id).orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_EXIST));
         Long post_like_cnt = postLikeRepository.countByPostId(post_id);
         List<PostComment> postCommentList = postCommentCommandService.getPostCommentList(post_id, httpServletRequest);
         List<PostCommentListDTO> post_comments = postCommentList.stream()

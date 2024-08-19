@@ -135,7 +135,9 @@ public class PostRestController {
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.createPost(request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_CREATED, PostConverter.toCreateResultDTO(post));
+//        return ApiResponse.onSuccess(PostConverter.toCreateResultDTO(post));
     }
+
 
     @Operation(summary = "게시글 수정 API",description = "유저가 작성한 게시글을 수정하는 API입니다")
     @ApiResponses({
@@ -150,7 +152,7 @@ public class PostRestController {
                                                                    HttpServletRequest httpServletRequest){
         Post post = postCommandService.updatePost(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_UPDATED, PostConverter.toUpdateResultDTO(post));
-
+//        return ApiResponse.onSuccess(PostConverter.toUpdateResultDTO(post));
     }
 
     @Operation(summary = "게시글 삭제 API",description = "게시판에 유저가 게시글을 삭제하는 API입니다")
@@ -166,6 +168,7 @@ public class PostRestController {
         Boolean isSuccess = postCommandService.deletePost(post_id, httpServletRequest);
         if(isSuccess){
             return ApiResponse.of(SuccessStatus.POST_DELETED, "게시글이 성공적으로 삭제되었습니다");
+//            return ApiResponse.onSuccess("게시글이 성공적으로 삭제되었습니다");
         }
         return null;
     }
@@ -183,6 +186,7 @@ public class PostRestController {
                                                                HttpServletRequest httpServletRequest){
         PostLike postLike = postCommandService.likePost(post_id, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_LIKE_SUCCESS, PostConverter.toLikeResultDTO(postLike));
+//        return ApiResponse.onSuccess(PostConverter.toLikeResultDTO(postLike));
     }
 
     @Operation(summary = "댓글 작성 API",description = "유저가 댓글을 작성하는 API입니다")
@@ -198,6 +202,7 @@ public class PostRestController {
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.createComment(post_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_CREATED, PostCommentConverter.toCreateResultDTO(postComment));
+//        return  ApiResponse.onSuccess(PostCommentConverter.toCreateResultDTO(postComment));
     }
 
     @Operation(summary = "댓글 수정 API",description = "유저가 작성한 댓글을 수정하는 API입니다")
@@ -215,6 +220,7 @@ public class PostRestController {
                                                                                  HttpServletRequest httpServletRequest){
         PostComment postComment = postCommentCommandService.updateComment(post_id, comment_id, request, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_UPDATED, PostCommentConverter.toUpdateResultDTO(postComment));
+//        return ApiResponse.onSuccess(PostCommentConverter.toUpdateResultDTO(postComment));
     }
 
     @Operation(summary = "댓글 삭제 API",description = "유저가 댓글을 삭제하는 API입니다")
@@ -232,6 +238,7 @@ public class PostRestController {
         Boolean isSuccess = postCommentCommandService.deleteComment(post_id, comment_id, httpServletRequest);
         if(isSuccess){
             return ApiResponse.of(SuccessStatus.POST_COMMENT_DELETED, "댓글이 성공적으로 삭제되었습니다");
+//            return ApiResponse.onSuccess("댓글이 성공적으로 삭제되었습니다");
         }
         return null;
     }
@@ -250,6 +257,7 @@ public class PostRestController {
                                                                              HttpServletRequest httpServletRequest){
         PostCommentLike postCommentLike = postCommentCommandService.likeComment(post_id, comment_id, httpServletRequest);
         return ApiResponse.of(SuccessStatus.POST_COMMENT_LIKE_SUCCESS, PostCommentConverter.toLikeResultDTO(postCommentLike));
+//        return ApiResponse.onSuccess(PostCommentConverter.toLikeResultDTO(postCommentLike));
     }
 
     @Operation(summary = "게시글 세부사항 조회 API",description = "게시글 클릭시 상세정보를 보여주는 API입니다")
