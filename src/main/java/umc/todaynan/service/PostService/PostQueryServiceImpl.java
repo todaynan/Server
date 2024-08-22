@@ -48,4 +48,9 @@ public class PostQueryServiceImpl implements PostQueryService{
 
         return postRepository.findAllByOrderByPostLikeListDesc(PageRequest.of(page, 10));
     }
+
+    @Override
+    public Page<Post> getUserPostListByUserId(long userId, Integer page) {
+        return postRepository.findAllByUserId(userId, PageRequest.of(page, 10));
+    }
 }

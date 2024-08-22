@@ -8,6 +8,7 @@ import umc.todaynan.domain.entity.User.User.User;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

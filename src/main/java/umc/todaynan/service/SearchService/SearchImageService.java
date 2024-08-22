@@ -1,4 +1,4 @@
-package umc.todaynan.service.NaverService;
+package umc.todaynan.service.SearchService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

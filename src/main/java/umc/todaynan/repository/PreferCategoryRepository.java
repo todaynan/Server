@@ -13,4 +13,6 @@ import java.util.List;
 public interface PreferCategoryRepository extends JpaRepository<PreferCategory, Long> {
     @Query("SELECT pc.title FROM PreferCategory pc WHERE pc.id IN (SELECT up.preferCategory.id FROM UserPrefer up WHERE up IN :userPreferList)")
     List<String> findTitlesByUserPrefer(@Param("userPreferList") List<UserPrefer> userPreferList);
+
+
 }

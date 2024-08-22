@@ -1,4 +1,4 @@
-package umc.todaynan.service.NaverService;
+package umc.todaynan.service.TokenService;
 
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class NaverTokenService {
         this.restTemplate = restTemplate;
     }
 
-    public Optional<TokenInfoDTO.NaverTokenInfo> verifyAccessToken(String accessToken) {
+    public Optional<TokenInfoDTO.NaverTokenInfoDTO> verifyAccessToken(String accessToken) {
         try {
             String url = UriComponentsBuilder.fromHttpUrl(NAVER_TOKENINFO_URL)
                     .toUriString();
@@ -29,7 +29,7 @@ public class NaverTokenService {
             headers.set("Authorization", "Bearer " + accessToken);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<TokenInfoDTO.NaverTokenInfo> response = restTemplate.exchange(url, HttpMethod.GET, entity, TokenInfoDTO.NaverTokenInfo.class);
+            ResponseEntity<TokenInfoDTO.NaverTokenInfoDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, TokenInfoDTO.NaverTokenInfoDTO.class);
             return Optional.ofNullable(response.getBody());
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || e.getStatusCode() == HttpStatus.BAD_REQUEST) {

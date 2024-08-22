@@ -5,6 +5,8 @@ import lombok.*;
 import umc.todaynan.domain.common.DateBaseEntity;
 import umc.todaynan.domain.entity.User.User.User;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -23,5 +25,9 @@ public class ChatRoom extends DateBaseEntity {
     @JoinColumn(name = "receive_user_id")
     private User receiveUser;
     //문제
+
+    // ChatRoom과 연결된 Chat들
+    @OneToMany(mappedBy = "chatRoom")
+    private List<Chat> chats;
 
 }

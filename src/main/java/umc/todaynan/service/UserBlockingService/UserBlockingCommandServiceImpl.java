@@ -9,6 +9,7 @@ import umc.todaynan.domain.entity.User.UserBlocking.UserBlocking;
 import umc.todaynan.repository.QueryDsl.UserBlockingQueryDslRepository;
 import umc.todaynan.repository.UserBlockingRepository;
 import umc.todaynan.repository.UserRepository;
+import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 
 @Service
 @Transactional
@@ -19,8 +20,8 @@ public class UserBlockingCommandServiceImpl implements UserBlockingCommandServic
     private final UserBlockingRepository userBlockingRepository;
     private final UserRepository userRepository;
     @Override
-    public void user1BlockUser2ByUserId(long userId1, String Nickname) {
-        Long userId2 = userBlockingQueryDslRepository.findUserIdByUserNickName(Nickname);
+    public void user1BlockUser2ByUserId(long userId1, UserRequestDTO.UserGeneralRequestDTO Nickname) {
+        Long userId2 = userBlockingQueryDslRepository.findUserIdByUserNickName(Nickname.getRequest());
         if(userId2 == null) {
             log.info("[Repository - user1BlockUser2ByUserId] {}이라는 닉네임을 가진 유저를 찾을 수 없습니다. UserNotFoundException 처리합니다.", Nickname);
             throw new UserNotFoundException("해당 닉네임을 가진 학생이 없습니다.");

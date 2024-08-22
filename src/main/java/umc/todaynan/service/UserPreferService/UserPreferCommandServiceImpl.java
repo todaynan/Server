@@ -17,7 +17,7 @@ public class UserPreferCommandServiceImpl implements UserPreferCommandService {
 
 
     @Override
-    public void changeMyInterset(long userId, List<String> Interests) {
+    public void changeMyInterset(long userId, List<Integer> Interests) {
         userPreferQueryDslRepository.changePreferList(userId, Interests);
         log.info("[Service - changeMyInterset] 관심사 변경이 완료되었습니다.");
     }

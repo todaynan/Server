@@ -1,6 +1,10 @@
 package umc.todaynan.web.dto.UserDTO;
 
 import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import umc.todaynan.domain.enums.PlaceCategory;
 
 import java.time.LocalDateTime;
@@ -11,7 +15,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResultDTO {
+    public static class JoinResponseDTO {
         private Long user_id;
         private LocalDateTime created_at;
         private String accessToken;
@@ -22,7 +26,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class AutoLoginResultDTO {
+    public static class AutoLoginResponseDTO {
         private Long user_id;
         private String accessToken;
         private String refreshToken;
@@ -33,7 +37,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginResultDTO {
+    public static class LoginResponseDTO {
         private Long user_id;
         private String accessToken;
         private String refreshToken;
@@ -44,8 +48,8 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UserLikeResultDTO {
-        private Long id;
+    public static class UserLikeResponseDTO {
+        private Long like_id;
         private String title;
         private LocalDateTime created_at;
         private LocalDateTime updated_at;
@@ -55,7 +59,7 @@ public class UserResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class GetUserLikeListResultDTO {
+    public static class GetUserLikeListResponseDTO {
         private List<UserLikeItems> userLikeItems;
     }
 
@@ -64,7 +68,7 @@ public class UserResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserLikeItems {
-        private Long id;
+        private Long like_id;
         private String title;
         private PlaceCategory category;
         private String description;

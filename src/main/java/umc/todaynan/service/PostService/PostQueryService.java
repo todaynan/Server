@@ -9,4 +9,5 @@ public interface PostQueryService {
     Page<Post> getChatPostList(Integer page, String middleAddress);
     Page<Post> getSuggestPostList(Integer page, String middleAddress);
     Page<Post> getHotPostList(Integer page);
+    Page<Post> getUserPostListByUserId(long userId, Integer page);
 }

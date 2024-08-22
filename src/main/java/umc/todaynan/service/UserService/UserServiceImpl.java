@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.todaynan.apiPayload.code.status.ErrorStatus;
@@ -14,6 +16,7 @@ import umc.todaynan.apiPayload.exception.handler.PreferCategoryHandler;
 import umc.todaynan.apiPayload.exception.handler.UserHandler;
 import umc.todaynan.converter.UserConverter;
 import umc.todaynan.converter.UserPreferConverter;
+import umc.todaynan.domain.entity.Post.Post.Post;
 import umc.todaynan.domain.entity.User.User.User;
 import umc.todaynan.domain.entity.User.UserLike.UserLike;
 import umc.todaynan.domain.entity.User.UserPrefer.PreferCategory;
@@ -22,18 +25,14 @@ import umc.todaynan.domain.enums.LoginType;
 import umc.todaynan.oauth2.Token;
 import umc.todaynan.oauth2.TokenService;
 import umc.todaynan.oauth2.user.ProviderUser;
-import umc.todaynan.repository.PreferCategoryRepository;
-import umc.todaynan.repository.UserLikeRepository;
-import umc.todaynan.repository.UserPreferRepository;
-import umc.todaynan.repository.UserRepository;
+import umc.todaynan.repository.*;
 import umc.todaynan.web.dto.UserDTO.UserRequestDTO;
 import umc.todaynan.web.dto.UserDTO.UserResponseDTO;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +46,9 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserLikeRepository userLikeRepository;
     private final UserPreferRepository userPreferRepository;
+    private final PostCommentCommentRepository postCommentCommentRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostRepository postRepository;
 
     private final TokenService tokenService;
     private final UserConverter userConverter;
@@ -73,8 +75,8 @@ public class UserServiceImpl implements UserService{
     }
     @Transactional
     @Override
-    public User joinUser(UserRequestDTO.JoinUserDTO joinUserDTO, String email, LoginType loginType) {
-        User newUser = UserConverter.toUser(joinUserDTO, email, loginType);
+    public User signupUser(UserRequestDTO.JoinUserRequestDTO joinUserDTO, String email, LoginType loginType) {
+        User newUser = UserConverter.toUserDTO(joinUserDTO, email, loginType);
 
         List<PreferCategory> preferCategoryList = joinUserDTO.getPreferCategory().stream()
                 .map(category -> {
@@ -105,7 +107,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDTO.AutoLoginResultDTO autoLoginUser(HttpServletRequest httpServletRequest) {
+    public UserResponseDTO.AutoLoginResponseDTO autoLoginUser(HttpServletRequest httpServletRequest) {
         String givenToken = tokenService.getJwtFromHeader(httpServletRequest);
         String email = tokenService.getUid(givenToken);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserHandler(ErrorStatus.USER_ERROR));
@@ -114,11 +116,11 @@ public class UserServiceImpl implements UserService{
         Date date = tokenService.getExpiration(newToken.getAccessToken());
         LocalDateTime expiration = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 
-        return userConverter.toAutoLoginResultDTO(user, newToken,expiration);
+        return userConverter.toAutoLoginResponseDTO(user, newToken,expiration);
     }
 
     @Override
-    public UserResponseDTO.LoginResultDTO loginUser(String email) {
+    public UserResponseDTO.LoginResponseDTO loginUser(String email) {
         if(userRepository.existsByEmail(email)) { //이미 존재
             Optional<User> user = userRepository.findByEmail(email);
             Token newToken = tokenService.generateToken(user.get().getEmail(), "USER");
@@ -126,7 +128,7 @@ public class UserServiceImpl implements UserService{
             Date date = tokenService.getExpiration(newToken.getAccessToken());
             LocalDateTime expiration = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 
-            return userConverter.toLoginResultDTO(user.get(), newToken,expiration);
+            return userConverter.toLoginResponseDTO(user.get(), newToken,expiration);
         }
         else{   //존재 X
             return null;
@@ -134,12 +136,12 @@ public class UserServiceImpl implements UserService{
     }
     @Transactional
     @Override
-    public UserLike likeLocation(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeDTO userLikeDTO) {
+    public UserLike createLikeItem(HttpServletRequest httpServletRequest, UserRequestDTO.UserLikeRequestDTO userLikeDTO) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
             Optional<User> user = userRepository.findByEmail(email);
-            UserLike userLike = userConverter.toUserLike(user.get(), userLikeDTO);
+            UserLike userLike = userConverter.toUserLikeDTO(user.get(), userLikeDTO);
 
             return userLikeRepository.save(userLike);
         }
@@ -149,7 +151,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDTO.GetUserLikeListResultDTO likeLocationList(HttpServletRequest httpServletRequest) {
+    public UserResponseDTO.GetUserLikeListResponseDTO getLikeItems(HttpServletRequest httpServletRequest) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
@@ -158,7 +160,7 @@ public class UserServiceImpl implements UserService{
 
             logger.debug("userLikeListResultList : {}", userLikeListResultList);
 
-            return userConverter.toUserLikeListResultDTO(userLikeListResultList);
+            return userConverter.toUserLikeItemsResponseDTO(userLikeListResultList);
         }
         else{   //존재 X
             return null;
@@ -166,44 +168,52 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<String> getPreferCategoryList(HttpServletRequest httpServletRequest) {
+    public List<String> getPreferCategoryItems(User user) {
+        List<UserPrefer> userLikeListResultList = userPreferRepository.findAllByUser(user);
+        logger.debug("userLikeListResultList : {}", userLikeListResultList);
+
+        List<String> userPreferTitleList = preferCategoryRepository.findTitlesByUserPrefer(userLikeListResultList);
+        logger.debug("userPreferTitleList : {}", userPreferTitleList);
+
+        return userPreferTitleList;
+    }
+
+    @Transactional
+    @Override
+    public Boolean deleteLikeItem(HttpServletRequest httpServletRequest, Long likeId) {
         String email = tokenService.getUid(tokenService.getJwtFromHeader(httpServletRequest));
 
         if(userRepository.existsByEmail(email)) { //이미 존재
             Optional<User> user = userRepository.findByEmail(email);
-            List<UserPrefer> userLikeListResultList = userPreferRepository.findAllByUser(user.get());
-
-            logger.debug("userLikeListResultList : {}", userLikeListResultList);
-
-            List<String> userPreferTitleList = preferCategoryRepository.findTitlesByUserPrefer(userLikeListResultList);
-
-            logger.debug("userPreferTitleList : {}", userPreferTitleList);
-
-            return userPreferTitleList;
+            if (userLikeRepository.deleteUserLikeByIdAndUser(likeId, user.get()) > 0) {
+                return true;
+            }else {
+                return false;
+            }
         }
         else{   //존재 X
-            return null;
+            return false;
         }
     }
 
     @Transactional
     @Override
-    public void changeNickNameByUserId(long userId, String newNickname) {
+    public void changeNickNameByUserId(long userId, UserRequestDTO.UserGeneralRequestDTO newNickname) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("해당 학번의 학생을 찾지 못했습니다.")
         );
-        user.setNickName(newNickname);
+        user.setNickName(newNickname.getRequest());
         log.info("[UserService - changeNickNameByUserId] user : {}", user.getNickName());
         userRepository.save(user);
         log.info("[UserService - changeNickNameByUserId] {}번 유저의 닉네임이 {}로 변경되었습니다.", userId, newNickname);
     }
     @Transactional
     @Override
-    public void changeMyAddress(long userId, String newAddress) {
+    public void changeMyAddress(long userId, UserRequestDTO.UserGeneralRequestDTO newAddress) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("해당 학번의 학생을 찾지 못했습니다.")
         );
-        user.setAddress(newAddress);
+        user.setAddress(newAddress.getRequest());
         userRepository.save(user);
         log.info("[UserService - changeNickNameByUserId] {}번 유저의 주소가 {}로 변경되었습니다.", userId, newAddress);
     }
@@ -230,4 +240,18 @@ public class UserServiceImpl implements UserService{
         return user.getId();
     }
 
+
+    public Page<Post> getUserPostListByUserIdByUserIdAndComments(long userId, PageRequest pageRequest) {
+        List<Long> postIdsByUserIdOnCommentComment = postCommentCommentRepository.findPostIdsByUserId(userId);
+        List<Long> postIdsByUserIdOnComment = postCommentRepository.findPostIdsByUserId(userId);
+        Set<Long> merged = new HashSet<>(postIdsByUserIdOnCommentComment);
+        merged.addAll(postIdsByUserIdOnComment);
+        List<Post> posts = postRepository.findAllById(merged);
+        long total = posts.size();
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), posts.size());
+        List<Post> pagedPosts = posts.subList(start, end);
+
+        return new PageImpl<>(pagedPosts, pageRequest, total);
+    }
 }

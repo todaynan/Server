@@ -1,14 +1,22 @@
 package umc.todaynan.converter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import umc.todaynan.domain.entity.User.User.User;
+import umc.todaynan.domain.enums.PlaceCategory;
+import umc.todaynan.repository.UserLikeRepository;
+import umc.todaynan.web.dto.SearchDTO.SearchPlaceDTO;
 import umc.todaynan.web.controller.SearchRestController;
 import umc.todaynan.web.dto.SearchDTO.SearchGeminiDTO;
 import umc.todaynan.web.dto.SearchDTO.SearchImageDTO;
-import umc.todaynan.web.dto.SearchDTO.SearchLocationDTO;
 import umc.todaynan.web.dto.SearchDTO.SearchResponseDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,36 +25,18 @@ import java.util.stream.IntStream;
 public class SearchConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchRestController.class);
-    public  SearchResponseDTO.NaverSearchDTO toSearchDTO(SearchLocationDTO.NaverLocationInfo naverLocationInfo, List<SearchImageDTO.NaverImageItems> naverImageInfo) {
-        logger.debug("NaverLocationInfo : {}", naverLocationInfo.getItems());
-        logger.debug("naverImageInfo : {}", naverImageInfo);
+    private final ObjectMapper objectMapper;
+    private final UserLikeRepository userLikeRepository;
 
-        List<SearchResponseDTO.NaverSearchResultDTO> searchResultDTOList = IntStream.range(0, naverLocationInfo.getItems().size())
-                .mapToObj(i -> toSearchResultDTO( naverLocationInfo.getItems().get(i),  naverImageInfo.get(i)))
-                .collect(Collectors.toList());
+    public SearchConverter(ObjectMapper objectMapper, UserLikeRepository userLikeRepository) {
 
-        logger.debug("searchResultDTOList : {}", searchResultDTOList);
-
-        return SearchResponseDTO.NaverSearchDTO.builder()
-                .naverSearchResultDTOList(searchResultDTOList)
-                .build();
+        this.objectMapper = objectMapper;
+        this.userLikeRepository = userLikeRepository;
     }
 
-    public  SearchResponseDTO.NaverSearchResultDTO toSearchResultDTO(SearchLocationDTO.NaverLocationItems naverLocationItem, SearchImageDTO.NaverImageItems naverImageItem) {
-        return SearchResponseDTO.NaverSearchResultDTO.builder()
-                .title(naverLocationItem.getTitle())
-                .category(naverLocationItem.getCategory())
-                .description(naverLocationItem.getDescription())
-                .roadAddress(naverLocationItem.getRoadAddress())
-                .thumbnail(naverImageItem.getThumbnail())
-                .mapx(naverLocationItem.getMapx())
-                .mapy(naverLocationItem.getMapy())
-                .build();
-    }
-
-    public  SearchGeminiDTO.GeminiResponseDTO toGeminiSearchDTO(SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO, List<SearchImageDTO.NaverImageItems> naverImageInfo) {
+    public  SearchGeminiDTO.GeminiResponseDTO toGeminiSearchDTO(SearchGeminiDTO.GeminiResponseDTO geminiResponseDTO, List<SearchImageDTO.NaverImageItems> naverImageInfo, User user) {
         List<SearchGeminiDTO.GeminiResponseItemDTO> searchResultDTOList = IntStream.range(0, geminiResponseDTO.getGeminiResponseItemDTOList().size())
-                .mapToObj(i -> toGeminiSearchResultDTO( geminiResponseDTO.getGeminiResponseItemDTOList().get(i),  naverImageInfo.get(i)))
+                .mapToObj(i -> toGeminiSearchResponseDTO( geminiResponseDTO.getGeminiResponseItemDTOList().get(i),  naverImageInfo.get(i), user))
                 .collect(Collectors.toList());
 
         logger.debug("searchResultDTOList : {}", searchResultDTOList);
@@ -56,12 +46,77 @@ public class SearchConverter {
                 .build();
     }
 
-    public  SearchGeminiDTO.GeminiResponseItemDTO toGeminiSearchResultDTO(SearchGeminiDTO.GeminiResponseItemDTO geminiResponseItem, SearchImageDTO.NaverImageItems naverImageItem) {
+    public  SearchGeminiDTO.GeminiResponseItemDTO toGeminiSearchResponseDTO(SearchGeminiDTO.GeminiResponseItemDTO geminiResponseItem, SearchImageDTO.NaverImageItems naverImageItem, User user) {
         return SearchGeminiDTO.GeminiResponseItemDTO.builder()
                 .title(geminiResponseItem.getTitle())
                 .description(geminiResponseItem.getDescription())
                 .image(naverImageItem.getThumbnail())
                 .category(geminiResponseItem.getCategory())
+                .isLike(userLikeRepository.existsByTitleAndUserAndCategory(geminiResponseItem.getTitle(), user, PlaceCategory.IN))
                 .build();
+    }
+
+    public SearchGeminiDTO.GeminiResponseDTO convertJsonToGeminiResponseDTO(String jsonString) throws JsonProcessingException {
+        String validJsonString = jsonString.replaceAll("```json\\n|\\n```", "");
+
+        CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, SearchGeminiDTO.GeminiResponseItemDTO.class);
+        List<SearchGeminiDTO.GeminiResponseItemDTO> geminiResponseItemDTOList = objectMapper.readValue(validJsonString, listType);
+        return SearchGeminiDTO.GeminiResponseDTO.builder().geminiResponseItemDTOList(geminiResponseItemDTOList).build();
+    }
+
+    public List<SearchPlaceDTO.GooglePlaceResultDTO> toGooglePlaceResponseDTO(JsonNode responseJson, User user) {
+        List<SearchPlaceDTO.GooglePlaceResultDTO> places = new ArrayList<>();
+        for (JsonNode result : responseJson.get("places")) {
+            String name = result.get("displayName").get("text").asText();
+            String address = result.get("formattedAddress").asText();
+            String type = result.get("types").get(0).asText();
+            String photoUrl = result.get("photos") != null && result.get("photos").size() > 0 &&
+                    result.get("photos").get(0).get("name") != null ?
+                    result.get("photos").get(0).get("name").asText() : "";
+
+            JsonNode viewportNode = result.get("viewport");
+            JsonNode northeastNode = viewportNode.get("low");
+            JsonNode southwestNode = viewportNode.get("high");
+
+            SearchPlaceDTO.GooglePlaceGeometryInfoDTO googlePlaceNorthDTO
+                    = SearchPlaceDTO.GooglePlaceGeometryInfoDTO.builder()
+                    .lat(northeastNode.get("latitude").asDouble())
+                    .lng(northeastNode.get("longitude").asDouble())
+                    .build();
+
+            SearchPlaceDTO.GooglePlaceGeometryInfoDTO googlePlaceSouthDTO
+                    = SearchPlaceDTO.GooglePlaceGeometryInfoDTO.builder()
+                    .lat(southwestNode.get("latitude").asDouble())
+                    .lng(southwestNode.get("longitude").asDouble())
+                    .build();
+
+            SearchPlaceDTO.GooglePlaceGeometryViewportDTO googlePlaceGeometryViewportDTO
+                    = SearchPlaceDTO.GooglePlaceGeometryViewportDTO.builder()
+                    .low(googlePlaceNorthDTO)
+                    .high(googlePlaceSouthDTO)
+                    .build();
+
+
+            SearchPlaceDTO.GooglePlaceGeometryDTO googlePlaceGeometryDTO
+                    = SearchPlaceDTO.GooglePlaceGeometryDTO.builder()
+                    .viewport(googlePlaceGeometryViewportDTO)
+                    .build();
+
+
+
+
+            SearchPlaceDTO.GooglePlaceResultDTO googlePlaceResultDTO
+                    = SearchPlaceDTO.GooglePlaceResultDTO.builder()
+                    .name(name)
+                    .photoUrl(photoUrl)
+                    .geometry(googlePlaceGeometryDTO)
+                    .type(type)
+                    .address(address)
+                    .isLike(userLikeRepository.existsByTitleAndUserAndCategory(name, user, PlaceCategory.OUT))
+                    .build();
+
+            places.add(googlePlaceResultDTO);
+        }
+        return places;
     }
 }
